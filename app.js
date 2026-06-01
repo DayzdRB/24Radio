@@ -166,7 +166,7 @@ function formatAtisForSpeech(text) {
 
   // 10. Replace remaining / with SLASH (should be handled above, but as a fallback)
   result = result.replace(/\//g, " SLASH ");
-  result = result.replace(/\bATIS\b/g, "Atis");
+  result = result.replace(/\bATIS\b/g, "A tis");
   return result;
 }
 
