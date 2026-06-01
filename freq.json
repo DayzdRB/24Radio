@@ -1,1 +1,223 @@
+[
+{ 
+  "name": "IRCC",
+  "freq": "124.850",
+  "channelID": "1409259489580023898"
+}
 
+{
+  "name": "IRFD_TWR",
+  "freq": "118.100",
+  "channelID": "1409259574162358292"
+}
+
+{
+  "name": "IRFD_GND",
+  "freq": "120.400",
+  "channelID": "1409259635285688474"
+}
+
+{
+  "name": "IMLR_TWR",
+  "freq": "133.850",
+  "channelID": "1409259671096791110"
+}
+
+{
+  "name": "IGAR_TWR",
+  "freq": "125.600",
+  "channelID": "1409259714193129655"
+}
+
+{
+  "name": "IBLT_TWR",
+  "freq": "120.250",
+  "channelID": "1409260318441603112"
+}
+
+{
+  "name": "ITRC_TWR",
+  "freq": "119.150",
+  "channelID": "1409260436020527266"
+}
+
+{
+  "name": "ICCC",
+  "freq": "126.300",
+  "channelID": "1409260679193694320"
+}
+
+{
+  "name": "ILAR_TWR",
+  "freq": "121.200",
+  "channelID": "1409260714610135243"
+}
+
+{
+  "name": "ILAR_GND",
+  "freq": "119.400",
+  "channelID": "1409260740787048520"
+}
+
+{
+  "name": "IPAP_TWR",
+  "freq": "119.900",
+  "channelID": "1409260770113355776"
+}
+
+{
+  "name": "IIAB_TWR",
+  "freq": "127.250",
+  "channelID": "1409260797871526039"
+}
+
+{
+  "name": "IHEN_TWR",
+  "freq": "130.250",
+  "channelID": "1409260822940881098"
+}
+
+{
+  "name": "IBAR_TWR",
+  "freq": "118.750",
+  "channelID": "1409260849344024697"
+}
+
+{
+  "name": "IZCC",
+  "freq": "125.650",
+  "channelID": "1409260891442118877"
+}
+
+{
+  "name": "IZOL_TWR",
+  "freq": "118.700",'
+  "channelID": "1409260919220863169"
+}
+
+{
+  "name": "IZOL_GND",
+  "freq": "121.900",
+  "channelID": "1409260950791393381"
+}
+
+{
+  "name": "IJAF_TWR",
+  "freq": "119.100",
+  "channelID": "1409260976364326932"
+}
+
+{
+  "name": "ISCM_TWR",
+  "freq": "121.300",
+  "channelID": "1409261001442070540"
+}
+
+{
+  "name": "IOCC",
+  "freq": "132.300",
+  "channelID": "1409261074146005151"
+}
+
+{
+  "name": "ITKO_TWR",
+  "freq": "118.800",
+  "channelID": "1409261115950497882"
+}
+
+{
+  "name": "ITKO_GND",
+  "freq": "118.225",
+  "channelID": "1409261183877255199"
+}
+
+{
+  "name": "IDCS_TWR",
+  "freq": "118.250",
+  "channelID": "1409261335425843311"
+}
+
+{
+  "name": "IBRD_TWR",
+  "freq": "118.350",
+  "channelID": "1444058256052846674"
+}
+
+{
+  "name": "IPCC",
+  "freq": "135.250",
+  "channelID": "1409261040360755331"
+}
+
+{
+  "name": "IPPH_TWR",
+  "freq": "127.400",
+  "channelID": "1409261095780089917"
+}
+
+{
+  "name": "IPPH_GND",
+  "freq": "121.700",
+  "channelID": "1409261121096912936"
+}
+
+{
+  "name": "ILKL_TWR",
+  "freq": "120.150",
+  "channelID": "1409261144413048922"
+}
+
+{
+  "name": "IBCC",
+  "freq": "128.600",
+  "channelID": "1409260864716144660"
+}
+
+{
+  "name": "IBTH_TWR",
+  "freq": "118.700",
+  "channelID": "1409260903232180277",
+}
+
+{
+  "name": "ISKP_TWR",
+  "freq": "123.250",
+  "channelID": "1409260942658895942"
+}
+
+{
+  "name": "IGCC",
+  "freq": "126.750",
+  "channelID": "1409260603884961913"
+}
+
+{
+  "name": "IKFL_TWR",
+  "freq": "118.300",
+  "channelID": "1494492452587831448"
+}
+
+{
+  "name": "IKFL_GND",
+  "freq": "121.750",
+  "channelID": "1494510227859701830"
+}
+
+{
+  "name": "ITEY_TWR",
+  "freq": "119.425",
+  "channelID": "1494511321847431221"
+}
+
+{
+  "name": "ISCC",
+  "freq": "127.825",
+  "channelID": "1409260557097238538"
+}
+
+{
+  "name": "ISAU_TWR",
+  "freq": "118.200",
+  "channelID": "1409260523018522704"
+}
+]
