@@ -14,3 +14,6 @@ async function loadfrequencies()
     console.error("Error loading freq.json:", error);
   }
 }
+
+
+loadfrequencies();
