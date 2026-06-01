@@ -222,7 +222,7 @@
 },
 {
   "name": "IBTH_ATIS",
-  "freq": "118.450",
+  "freq": "118.450"
 },
   
 {
@@ -237,13 +237,13 @@
 
 {
   "name": "IMLR_ATIS",
-  "freq": "126.030",
+  "freq": "126.030"
 },
   
 {
   "name": "IPAP_ATIS",
   "freq": "127.325"
-}
+},
 
 {
   "name": "IPPH_ATIS",
@@ -265,7 +265,7 @@
 },
 
 {
-  "name: ""IKFL_ATIS",
+  "name": "IKFL_ATIS",
   "freq": "128.300"
 },
 
@@ -275,7 +275,7 @@
 },
 {
   "name": "IBRD_ATIS",
-  "freq": "131.60"
+  "freq": "131.600"
 },
 
 {
@@ -294,7 +294,7 @@
 },
 
 {
-  "name": "ISCM_ATOS",
+  "name": "ISCM_ATIS",
   "freq": "119.200"
 },
 
