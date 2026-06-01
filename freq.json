@@ -262,5 +262,10 @@
 {
   "name": "ITKO_ATIS",
   "freq": "128.800"
+},
+
+{
+  "name: ""IKFL_ATIS",
+  "freq": "128.300"
 }
 ]
