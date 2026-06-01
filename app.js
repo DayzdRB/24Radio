@@ -64,6 +64,68 @@ function getAtisForAirport(allAtis, airport){
   return allAtis.find(a => a.airport === airport);
 }
 
+
+function formatAtisForSpeech(text){
+  if(!text) return = "";
+  let result = text.toUpperCase();
+
+  const phonetic = {
+    "A": "Alpha",
+    "B": "Bravo",
+    "C": "Charlie",
+    "D": "Delta",
+    "E": "Echo",
+    "F": "Foxtrot",
+    "G": "Golf",
+    "H": "Hotel",
+    "I": "India",
+    "J": "Juliet",
+    "K": "Kilo",
+    "L": "Lima",
+    "M": "Mike",
+    "N": "November",
+    "O": "Oscar",
+    "P": "Papa",
+    "Q": "Quebec",
+    "R": "Romeo",
+    "S": "Sierra",
+    "T": "Tango",
+    "U": "Uniform",
+    "V": "Victor",
+    "W": "Whiskey",
+    "X": "X-ray",
+    "Y": "Yankee",
+    "Z": "Zulu"
+  };
+  result = result.replace(/\bRWY\b/g, "RUNWAY");
+  result = result.replace(/\bDEP\b/g, "DEPARTURE");
+  result = result.replace(/\bARR\b/g, "ARRIVAL");
+  result = result.replace(/\bLEVEL\s+(\d{2,3})\b/g, "LEVEL $1");
+  result = result.replace(/\bINFO(?:RMATION)?\s+([A-Z])\b/g, (match, letter) => {
+    const phoneticLetter = phonetic[letter] || letter;
+    return "INFO " + phoneticLetter;
+  });
+
+  result = result.replace(/INFORMATION\s+([A-Z])\b/g, (match, letter) => {
+    const phoneticLetter = phonetic[letter] || letter;
+    return "INFORMATION " + phoneticLetter;
+  });
+  result = result.replace(/\b(\d+(?:\.\d+)?)\b/g, (match, num) => {
+    const [intPart, decPart] = num.split(".");
+    const intDigits = intPart.split("").join(" ");
+    if (decPart !== undefined) {
+      const decDigits = decPart.split("").join(" ");
+      return intDigits + " point " + decDigits;
+    }
+    return intDigits;
+  });
+  result = result.replace(/\//g, " SLASH ");
+  return result;
+}
+
+
+
+
 function speakText(text){
   speechSynthesis.cancel();
 
