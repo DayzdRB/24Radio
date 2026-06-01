@@ -219,5 +219,48 @@
   "name": "ISAU_TWR",
   "freq": "118.200",
   "channelID": "1409260523018522704"
+},
+{
+  "name": "IBTH_ATIS",
+  "freq": "118.450",
+},
+  
+{
+  "name": "IIAB_ATIS",
+  "freq": "124.650"
+},
+
+{
+  "name": "ILAR_ATIS",
+  "freq": "126.550"
+},
+
+{
+  "name": "IMLR_ATIS",
+  "freq": "126.030",
+},
+  
+{
+  "name": "IPAP_ATIS",
+  "freq": "127.325"
+}
+
+{
+  "name": "IPPH_ATIS",
+  "freq": "123.800"
+},
+
+{
+  "name": "IRFD_ATIS",
+  "freq": "127.600"
+},
+
+{
+  "name": "ISAU_ATIS",
+  "freq": "113.350"
+},
+{
+  "name": "ITKO_ATIS",
+  "freq": "128.8"
 }
 ]
