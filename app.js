@@ -5,7 +5,7 @@ async function loadfrequencies()
 {
   try
   {
-    const response = await fetch("/24Radio/freq.json");
+    const response = await fetch("freq.json");
     if(!response.ok){
       throw new Error("HTTP error! status: "+response.status);
     }
