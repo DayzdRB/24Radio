@@ -43,6 +43,43 @@ function showMessage(message){
   resultEl.textContent = message;
 }
 
+function isAtisEntry(entry){
+  return entry && !entry.channelID;
+}
+
+function getAirportFromAtisName(name){
+  if (!name) return null;
+  const parts = name.split("_");
+  return parts [0] || null;
+}
+
+async function fetchAllAtis(){
+  const res = await fetch("/api/atis");
+  if(!res.ok){
+    throw new Error("Failed to fetch ATIS" + res.status);
+  }
+  return res.json();
+}
+function getAtisForAirport(allAtis, airport){
+  return allAtis.find(a => a.airport === airport);
+}
+
+function speakText(text){
+  speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(test);
+  utterance.rate = 1.0;
+  utterance.pitch = 1.0;
+  utterance.volume = 1.0;
+
+  speechSynthesis.speak(utterance);
+}
+
+
+
+
+
+
 tuneBtn.addEventListener("click", () =>{
   const input = freqInput.value.trim();
   const entry = findFrequencyByNumber(input);
