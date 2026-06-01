@@ -21,18 +21,18 @@ async function loadfrequencies()
 
 
 loadfrequencies();
-updateDisplay();
+
 
 const activeFreqEl = document.getElementById("active-freq");
 const standbyFreqEl = document.getElementById("standby-freq");
 const freqInput = document.getElementById("freq-input");
 const tuneBtn = document.getElementById("tune-btn");
 const swapBtn = document.getElementById("swap-btn");
-const resuletEl = document.getElementById("result");
+const resultEl = document.getElementById("result");
 
 function updateDisplay(){
   activeFreqEl.textContent = activeFreq || "---";
-  standbyFreqEl.textConent = standbyFreq || "---";
+  standbyFreqEl.textContent = standbyFreq || "---";
 }
 
 function findFrequencyByNumber(freqStr){
@@ -40,7 +40,7 @@ function findFrequencyByNumber(freqStr){
 }
 
 function showMessage(message){
-  resultEl.textConent = message;
+  resultEl.textContent = message;
 }
 
 tuneBtn.addEventListener("click", () =>{
@@ -56,7 +56,7 @@ tuneBtn.addEventListener("click", () =>{
   updateDisplay();
   showMessage("Tuned to: "+ entry.name + " - "+ entry.freq);
   
-)};
+});
 
 swapBtn.addEventListener("click", () => {
   if (!standbyFreq){
@@ -70,8 +70,8 @@ swapBtn.addEventListener("click", () => {
 
   updateDisplay();
   showMessage("Swapped. Active: "+ activeFreq);
-}};
+});
 
-
+updateDisplay();
 
 
