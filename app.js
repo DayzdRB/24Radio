@@ -64,9 +64,8 @@ function getAtisForAirport(allAtis, airport){
   return allAtis.find(a => a.airport === airport);
 }
 
-
-function formatAtisForSpeech(text){
-  if(!text) return "";
+function formatAtisForSpeech(text) {
+  if (!text) return "";
   let result = text.toUpperCase();
 
   const phonetic = {
@@ -83,7 +82,7 @@ function formatAtisForSpeech(text){
     "K": "Kilo",
     "L": "Lima",
     "M": "Mike",
-    "N": "November",
+    "N": "Mike",
     "O": "Oscar",
     "P": "Papa",
     "Q": "Quebec",
@@ -97,19 +96,49 @@ function formatAtisForSpeech(text){
     "Y": "Yankee",
     "Z": "Zulu"
   };
+
+  // 1. Expand common abbreviations
   result = result.replace(/\bRWY\b/g, "RUNWAY");
   result = result.replace(/\bDEP\b/g, "DEPARTURE");
   result = result.replace(/\bARR\b/g, "ARRIVAL");
+  result = result.replace(/\bAFCT\b/g, "AIRCRAFT");
+  result = result.replace(/\bATIS\b/g, "ATIS INFORMATION");
+
+  // 2. Runway designators: 25R -> TWO FIVE RIGHT, 25L -> TWO FIVE LEFT, 25C -> TWO FIVE CENTER
+  result = result.replace(/\b(\d{2,3})R\b/g, "$1 RIGHT");
+  result = result.replace(/\b(\d{2,3})L\b/g, "$1 LEFT");
+  result = result.replace(/\b(\d{2,3})C\b/g, "$1 CENTER");
+
+  // 3. Time: 1821Z -> ONE EIGHT TWO ONE ZULU
+  result = result.replace(/\b(\d{4})Z\b/g, "$1 ZULU");
+  // Also handle standalone Z as ZULU
+  result = result.replace(/\bZ\b/g, " ZULU ");
+
+  // 4. Altimeter: Q1012 -> QNH ONE ZERO ONE TWO
+  result = result.replace(/\bQ(\d{4})\b/g, "QNH $1");
+
+  // 5. Cloud layers: FEW021 -> FEW ZERO TWO ONE, BKN035 -> BROKEN ZERO THREE FIVE
+  result = result.replace(/\bBKN(\d{2,3})\b/g, "BROKEN $1");
+  result = result.replace(/\bSCT(\d{2,3})\b/g, "SCATTERED $1");
+  result = result.replace(/\bOVC(\d{2,3})\b/g, "OVERCAST $1");
+  result = result.replace(/\bFEW(\d{2,3})\b/g, "FEW $1");
+
+  // 6. Transition level: LEVEL 030 -> LEVEL ZERO THREE ZERO
   result = result.replace(/\bLEVEL\s+(\d{2,3})\b/g, "LEVEL $1");
+
+  // 7. Replace "INFO X" or "INFORMATION X" with phonetic letter
   result = result.replace(/\bINFO(?:RMATION)?\s+([A-Z])\b/g, (match, letter) => {
     const phoneticLetter = phonetic[letter] || letter;
     return "INFO " + phoneticLetter;
   });
 
+  // 8. Replace "INFORMATION X" explicitly
   result = result.replace(/INFORMATION\s+([A-Z])\b/g, (match, letter) => {
     const phoneticLetter = phonetic[letter] || letter;
     return "INFORMATION " + phoneticLetter;
   });
+
+  // 9. Read numbers digit by digit
   result = result.replace(/\b(\d+(?:\.\d+)?)\b/g, (match, num) => {
     const [intPart, decPart] = num.split(".");
     const intDigits = intPart.split("").join(" ");
@@ -119,9 +148,13 @@ function formatAtisForSpeech(text){
     }
     return intDigits;
   });
+
+  // 10. Replace / with SLASH
   result = result.replace(/\//g, " SLASH ");
+
   return result;
 }
+
 
 
 
