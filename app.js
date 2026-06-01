@@ -167,8 +167,9 @@ tuneBtn.addEventListener("click", async () => {
 
         if (atis) {
           const atisText = atis.content.trim();
+          const atisTextForSpeech = formatAtisForSpeech(atisText);
           showMessage("ATIS fetched for " + airport + ". Speaking...");
-          speakText(atisText);
+          speakText(atisTextForSpeech);
         } else {
           showMessage("ATIS not found for " + airport);
         }
@@ -206,8 +207,9 @@ swapBtn.addEventListener("click", async () => {
 
         if (atis) {
           const atisText = atis.content.trim();
+          const atisTextForSpecch = formatAtisForSpeech(atisText);
           showMessage("ATIS active on COM1. Speaking...");
-          speakText(atisText);
+          speakText(atisTextForSpeech);
         } else {
           showMessage("ATIS not found for " + airport);
         }
