@@ -67,7 +67,7 @@ function getAtisForAirport(allAtis, airport){
 function formatAtisForSpeech(text) {
   if (!text) return "";
   let result = text.toUpperCase();
-  result = result.replace(/\bATIS\b/g, "Atis")
+  result = result.replace(/\bATIS\b/g, "Atis");
   const phonetic = {
     "A": "Alpha",
     "B": "Bravo",
