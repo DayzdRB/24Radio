@@ -67,7 +67,7 @@ function getAtisForAirport(allAtis, airport){
 function formatAtisForSpeech(text) {
   if (!text) return "";
   let result = text.toUpperCase();
-  
+
   const phonetic = {
     "A": "Alpha",
     "B": "Bravo",
@@ -98,33 +98,30 @@ function formatAtisForSpeech(text) {
   };
 
   // 1. Expand common abbreviations
-  // Keep ATIS as one word, but expand other abbreviations
   result = result.replace(/\bRWY\b/g, "RUNWAY");
   result = result.replace(/\bDEP\b/g, "DEPARTURE");
   result = result.replace(/\bARR\b/g, "ARRIVAL");
   result = result.replace(/\bAFCT\b/g, "AIRCRAFT");
-  // DO NOT replace ATIS — leave it as "ATIS"
 
-  // 2. Runway designators: 25R -> TWO FIVE RIGHT, 25L -> TWO FIVE LEFT, 25C -> TWO FIVE CENTER
+  // 2. Runway designators: 25R -> TWO FIVE RIGHT
   result = result.replace(/\b(\d{2,3})R\b/g, "$1 RIGHT");
   result = result.replace(/\b(\d{2,3})L\b/g, "$1 LEFT");
   result = result.replace(/\b(\d{2,3})C\b/g, "$1 CENTER");
 
   // 3. Time: 1821Z -> ONE EIGHT TWO ONE ZULU
   result = result.replace(/\b(\d{4})Z\b/g, "$1 ZULU");
-  // Also handle standalone Z as ZULU
   result = result.replace(/\bZ\b/g, " ZULU ");
 
   // 4. Altimeter: Q1012 -> QNH ONE ZERO ONE TWO
   result = result.replace(/\bQ(\d{4})\b/g, "QNH $1");
 
-  // 5. Cloud layers: FEW021 -> FEW TWO ONE, BKN035 -> BROKEN THREE FIVE
-  result = result.replace(/\bBKN(\d{2,3})\b/g, "BROKEN $1");
-  result = result.replace(/\bSCT(\d{2,3})\b/g, "SCATTERED $1");
-  result = result.replace(/\bOVC(\d{2,3})\b/g, "OVERCAST $1");
-  result = result.replace(/\bFEW(\d{2,3})\b/g, "FEW $1");
+  // 5. Cloud layers: FEW021 -> FEW CLOUDS AT TWO ONE
+  result = result.replace(/\bBKN(\d{2,3})\b/g, "BROKEN CLOUDS AT $1");
+  result = result.replace(/\bSCT(\d{2,3})\b/g, "SCATTERED CLOUDS AT $1");
+  result = result.replace(/\bOVC(\d{2,3})\b/g, "OVERCAST CLOUDS AT $1");
+  result = result.replace(/\bFEW(\d{2,3})\b/g, "FEW CLOUDS AT $1");
 
-  // 6. Transition level: LEVEL 030 -> LEVEL ZERO THREE ZERO
+  // 6. Transition level: LEVEL 030 -> TRANSITION LEVEL ZERO THREE ZERO
   result = result.replace(/\bLEVEL\s+(\d{2,3})\b/g, "LEVEL $1");
 
   // 7. Replace "INFO X" or "INFORMATION X" with phonetic letter
@@ -139,34 +136,44 @@ function formatAtisForSpeech(text) {
     return "INFORMATION " + phoneticLetter;
   });
 
-  // 9. Read numbers digit by digit ONLY for frequencies and short codes
-  // For weather, we'll keep numbers more natural but still clear
-  // Wind: 316/05 -> THREE ONE SIX SLASH ZERO FIVE
+  // 9. Weather line formatting for clarity
+  // Expecting something like: 316/05 9999 FEW021 04/09 Q1012
+  // We'll add labels: WIND, VISIBILITY, CLOUDS, TEMPERATURE
+
+  // First, handle cloud layers again here to ensure they're in the right format
+  result = result.replace(/\bBKN(\d{2,3})\b/g, "BROKEN CLOUDS AT $1");
+  result = result.replace(/\bSCT(\d{2,3})\b/g, "SCATTERED CLOUDS AT $1");
+  result = result.replace(/\bOVC(\d{2,3})\b/g, "OVERCAST CLOUDS AT $1");
+  result = result.replace(/\bFEW(\d{2,3})\b/g, "FEW CLOUDS AT $1");
+
+  // Wind: 316/05 -> WIND THREE ONE SIX SLASH ZERO FIVE
   result = result.replace(/\b(\d{3})\/(\d{2})\b/g, (match, dir, spd) => {
     const dirDigits = dir.split("").join(" ");
     const spdDigits = spd.split("").join(" ");
-    return dirDigits + " SLASH " + spdDigits;
+    return "WIND " + dirDigits + " SLASH " + spdDigits;
   });
 
-  // Visibility: 9999 -> NINE NINE NINE NINE (keep as digits)
-  result = result.replace(/\b9999\b/g, "NINE NINE NINE NINE");
+  // Visibility: 9999 -> VISIBILITY NINE NINE NINE NINE
+  result = result.replace(/\b9999\b/g, "VISIBILITY NINE NINE NINE NINE");
 
-  // Temperature/dew: 04/09 -> ZERO FOUR SLASH ZERO NINE
+  // Temperature/dew: 04/09 -> TEMPERATURE ZERO FOUR SLASH ZERO NINE
   result = result.replace(/\b(\d{2})\/(\d{2})\b/g, (match, t1, t2) => {
     const t1Digits = t1.split("").join(" ");
     const t2Digits = t2.split("").join(" ");
-    return t1Digits + " SLASH " + t2Digits;
+    return "TEMPERATURE ZERO FOUR SLASH ZERO NINE";
   });
 
-  // General numbers (for altimeter, cloud height, etc.)
+  // 10. General numbers (for altimeter, cloud height, etc.)
   result = result.replace(/\b(\d{2,3})\b/g, (match, num) => {
-    // For cloud heights like FEW TWO ONE, BKN THREE FIVE, etc., keep as digits
     return num.split("").join(" ");
   });
 
-  // 10. Replace remaining / with SLASH (should be handled above, but as a fallback)
+  // 11. Replace remaining / with SLASH (fallback)
   result = result.replace(/\//g, " SLASH ");
-  result = result.replace(/\bATIS\b/g, "A tis");
+
+  // 12. Force ATIS to be pronounced as one word: "Atis" (do this LAST)
+  result = result.replace(/\bATIS\b/g, "Atis");
+
   return result;
 }
 
