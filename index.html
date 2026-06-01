@@ -6,7 +6,7 @@
   <link rel ="icon"type="image/png" href="Favicon.png">
   <title>24Radio - ATC24 Radio Client</title>
 
-  <styke>
+  <style>
     body{
       background: #111;
       color: #0f0;
@@ -17,9 +17,9 @@
 
     #radio-panel{
       background: #222;
-      border: 3px solide #0f0;
+      border: 3px solid #0f0;
       border-radius: 8px;
-      display: incline-block;
+      display: inline-block;
       padding: 20px;
       margin-top: 20px;
     }
@@ -27,11 +27,11 @@
     #active-freq, #standby-freq{
     font-size: 20px;
     font-family: "Courier New", monospace;
-    background #000;
+    background: #000;
     border: 2px solid #0f0;
     padding: 8px 16px;
     display: incline-block;
-    min0width: 120px
+    min0width: 120px;
     }
 
     #freq-input{
@@ -44,16 +44,16 @@
     }
 
     button{
-    bacground: #000;
+    background: #000;
     color: #0f0;
     border: 2px solid #0f0;
     padding: 6px 12px;
-    font-size: 16px
+    font-size: 16px;
     cursor: pointer;
     }
 
     button:hover{
-    background: 003300;
+    background: #003300;
     }
 
     #result{
@@ -61,7 +61,7 @@
     font-size: 14px;
     color: 8f8;
     }
-  </styke>
+  </style>
 </head>
 <body>
   <h1>24Radio</h1>
@@ -79,11 +79,11 @@
 
   <div id="controls">
     <input type="text" id="freq-input" placeholder = "118.100">
-    <button id+"tune-btn">Tune</button>
+    <button id="tune-btn">Tune</button>
     <button id="swap-btn">SWAP</button>
   </div>
 
-  <div id="result"</div>
+  <div id="result"></div>
   </div>
 
   <script src= "app.js"></script>
