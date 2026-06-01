@@ -75,28 +75,53 @@ function speakText(text){
   speechSynthesis.speak(utterance);
 }
 
-
-
-
-
-
-tuneBtn.addEventListener("click", () =>{
+tuneBtn.addEventListener("click", async () => {
   const input = freqInput.value.trim();
   const entry = findFrequencyByNumber(input);
 
-  if(!entry){
-    showMessage("Frequency not found: "+ input);
+  if (!entry) {
+    showMessage("Frequency not found: " + input);
     return;
   }
 
-    standbyFreq = entry.freq;
+  console.log("Entry:", entry);
+  console.log("Is ATIS?", isAtisEntry(entry));
+  console.log("Airport:", getAirportFromAtisName(entry.name));
+
+  standbyFreq = entry.freq;
   updateDisplay();
-  showMessage("Tuned to: "+ entry.name + " - "+ entry.freq);
-  
+
+  const displayName = entry.name || "Unknown";
+  const freqDisplay = entry.freq || input;
+
+  if (isAtisEntry(entry)) {
+    const airport = getAirportFromAtisName(entry.name);
+    showMessage("Tuned to ATIS: " + displayName + " — " + freqDisplay);
+
+    if (airport) {
+      try {
+        const allAtis = await fetchAllAtis();
+        const atis = getAtisForAirport(allAtis, airport);
+
+        if (atis) {
+          const atisText = atis.content.trim();
+          showMessage("ATIS fetched for " + airport + ". Speaking...");
+          speakText(atisText);
+        } else {
+          showMessage("ATIS not found for " + airport);
+        }
+      } catch (err) {
+        console.error("Error fetching ATIS:", err);
+        showMessage("Failed to fetch ATIS for " + airport);
+      }
+    }
+  } else {
+    showMessage("Tuned to: " + displayName + " — " + freqDisplay);
+  }
 });
 
-swapBtn.addEventListener("click", () => {
-  if (!standbyFreq){
+swapBtn.addEventListener("click", async () => {
+  if (!standbyFreq) {
     showMessage("No standby frequency to swap.");
     return;
   }
@@ -106,8 +131,36 @@ swapBtn.addEventListener("click", () => {
   standbyFreq = temp;
 
   updateDisplay();
-  showMessage("Swapped. Active: "+ activeFreq);
+  showMessage("Swapped. Active: " + activeFreq);
+
+  // Check if the new active frequency is an ATIS
+  const activeEntry = frequencies.find(f => f.freq === activeFreq);
+  if (activeEntry && isAtisEntry(activeEntry)) {
+    const airport = getAirportFromAtisName(activeEntry.name);
+    if (airport) {
+      try {
+        const allAtis = await fetchAllAtis();
+        const atis = getAtisForAirport(allAtis, airport);
+
+        if (atis) {
+          const atisText = atis.content.trim();
+          showMessage("ATIS active on COM1. Speaking...");
+          speakText(atisText);
+        } else {
+          showMessage("ATIS not found for " + airport);
+        }
+      } catch (err) {
+        console.error("Error fetching ATIS after swap:", err);
+        showMessage("Failed to fetch ATIS for " + airport);
+      }
+    }
+  }
 });
+
+
+
+
+
 
 updateDisplay();
 
