@@ -281,5 +281,10 @@
 {
   "name": "IHEN_ATIS",
   "freq": "130.255"
+},
+
+{
+  "name": "IJAF_ATIS",
+  "freq": "123.900"
 }
 ]
