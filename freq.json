@@ -267,5 +267,19 @@
 {
   "name: ""IKFL_ATIS",
   "freq": "128.300"
+},
+
+{
+  "name": "IBAR_ATIS",
+  "freq": "118.080"
+},
+{
+  "name": "IBRD_ATIS",
+  "freq": "131.60"
+},
+
+{
+  "name": "IDCS",
+  "freq": "118.250"
 }
 ]
