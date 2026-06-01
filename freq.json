@@ -286,5 +286,30 @@
 {
   "name": "IJAF_ATIS",
   "freq": "123.900"
+},
+
+{
+  "name": "ILKL_ATIS",
+  "freq": "122.300"
+},
+
+{
+  "name": "ISCM_ATOS",
+  "freq": "119.200"
+},
+
+{
+  "name": "ISKP_ATIS",
+  "freq": "124.200"
+},
+
+{
+  "name": "ITEY_ATIS",
+  "freq": "119.100"
+},
+
+{
+  "name": "IZOL_ATIS",
+  "freq": "124.300"
 }
 ]
