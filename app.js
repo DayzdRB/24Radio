@@ -66,7 +66,7 @@ function getAtisForAirport(allAtis, airport){
 
 
 function formatAtisForSpeech(text){
-  if(!text) return = "";
+  if(!text) return "";
   let result = text.toUpperCase();
 
   const phonetic = {
@@ -207,7 +207,7 @@ swapBtn.addEventListener("click", async () => {
 
         if (atis) {
           const atisText = atis.content.trim();
-          const atisTextForSpecch = formatAtisForSpeech(atisText);
+          const atisTextForSpeech = formatAtisForSpeech(atisText);
           showMessage("ATIS active on COM1. Speaking...");
           speakText(atisTextForSpeech);
         } else {
