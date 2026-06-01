@@ -82,7 +82,7 @@ function formatAtisForSpeech(text) {
     "K": "Kilo",
     "L": "Lima",
     "M": "Mike",
-    "N": "Mike",
+    "N": "November",
     "O": "Oscar",
     "P": "Papa",
     "Q": "Quebec",
@@ -98,11 +98,12 @@ function formatAtisForSpeech(text) {
   };
 
   // 1. Expand common abbreviations
+  // Keep ATIS as one word, but expand other abbreviations
   result = result.replace(/\bRWY\b/g, "RUNWAY");
   result = result.replace(/\bDEP\b/g, "DEPARTURE");
   result = result.replace(/\bARR\b/g, "ARRIVAL");
   result = result.replace(/\bAFCT\b/g, "AIRCRAFT");
-  result = result.replace(/\bATIS\b/g, "ATIS INFORMATION");
+  // DO NOT replace ATIS — leave it as "ATIS"
 
   // 2. Runway designators: 25R -> TWO FIVE RIGHT, 25L -> TWO FIVE LEFT, 25C -> TWO FIVE CENTER
   result = result.replace(/\b(\d{2,3})R\b/g, "$1 RIGHT");
@@ -117,7 +118,7 @@ function formatAtisForSpeech(text) {
   // 4. Altimeter: Q1012 -> QNH ONE ZERO ONE TWO
   result = result.replace(/\bQ(\d{4})\b/g, "QNH $1");
 
-  // 5. Cloud layers: FEW021 -> FEW ZERO TWO ONE, BKN035 -> BROKEN ZERO THREE FIVE
+  // 5. Cloud layers: FEW021 -> FEW TWO ONE, BKN035 -> BROKEN THREE FIVE
   result = result.replace(/\bBKN(\d{2,3})\b/g, "BROKEN $1");
   result = result.replace(/\bSCT(\d{2,3})\b/g, "SCATTERED $1");
   result = result.replace(/\bOVC(\d{2,3})\b/g, "OVERCAST $1");
@@ -138,18 +139,32 @@ function formatAtisForSpeech(text) {
     return "INFORMATION " + phoneticLetter;
   });
 
-  // 9. Read numbers digit by digit
-  result = result.replace(/\b(\d+(?:\.\d+)?)\b/g, (match, num) => {
-    const [intPart, decPart] = num.split(".");
-    const intDigits = intPart.split("").join(" ");
-    if (decPart !== undefined) {
-      const decDigits = decPart.split("").join(" ");
-      return intDigits + " point " + decDigits;
-    }
-    return intDigits;
+  // 9. Read numbers digit by digit ONLY for frequencies and short codes
+  // For weather, we'll keep numbers more natural but still clear
+  // Wind: 316/05 -> THREE ONE SIX SLASH ZERO FIVE
+  result = result.replace(/\b(\d{3})\/(\d{2})\b/g, (match, dir, spd) => {
+    const dirDigits = dir.split("").join(" ");
+    const spdDigits = spd.split("").join(" ");
+    return dirDigits + " SLASH " + spdDigits;
   });
 
-  // 10. Replace / with SLASH
+  // Visibility: 9999 -> NINE NINE NINE NINE (keep as digits)
+  result = result.replace(/\b9999\b/g, "NINE NINE NINE NINE");
+
+  // Temperature/dew: 04/09 -> ZERO FOUR SLASH ZERO NINE
+  result = result.replace(/\b(\d{2})\/(\d{2})\b/g, (match, t1, t2) => {
+    const t1Digits = t1.split("").join(" ");
+    const t2Digits = t2.split("").join(" ");
+    return t1Digits + " SLASH " + t2Digits;
+  });
+
+  // General numbers (for altimeter, cloud height, etc.)
+  result = result.replace(/\b(\d{2,3})\b/g, (match, num) => {
+    // For cloud heights like FEW TWO ONE, BKN THREE FIVE, etc., keep as digits
+    return num.split("").join(" ");
+  });
+
+  // 10. Replace remaining / with SLASH (should be handled above, but as a fallback)
   result = result.replace(/\//g, " SLASH ");
 
   return result;
