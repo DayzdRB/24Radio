@@ -69,7 +69,6 @@ function stopAtisLoop() {
   currentAtisLoop = null;
 }
 
-
 function formatAtisIntoLines(text) {
   if (!text) return [];
 
@@ -145,22 +144,29 @@ function formatAtisIntoLines(text) {
     line = line.replace(/\bAFCT\b/g, "AIRCRAFT");
 
     // 2. Break up ARRIVAL RUNWAY from DEPARTURE RUNWAY on separate lines FIRST (before runway letter replacement)
-    if (line.includes("DEPARTURE") && line.includes("ARRIVAL")) {
-      const depMatch = line.match(/DEPARTURE RUNWAY \d+[LCR]?/);
-      const arrMatch = line.match(/ARRIVAL RUNWAY \d+[LCR]?/);
+    if (line.includes("DEPARTURE RUNWAY") && line.includes("ARRIVAL RUNWAY")) {
+      // Split by "ARRIVAL RUNWAY" to get two separate parts
+      const parts = line.split("ARRIVAL RUNWAY");
+      if (parts.length === 2) {
+        let depLine = parts[0].trim();
+        let arrLine = parts[1].trim();
 
-      if (depMatch && arrMatch) {
-        let depLine = depMatch[0].trim();
-        let arrLine = arrMatch[0].trim();
+        // Clean up depLine (remove leading "RUNWAY" if duplicated)
+        depLine = depLine.replace(/RUNWAY\s+$/g, "").trim();
+        
+        // Add back "RUNWAY" if missing
+        if (!depLine.includes("RUNWAY")) {
+          depLine = depLine + " RUNWAY";
+        }
 
-        // Now apply runway letter replacement to each line
-        depLine = depLine.replace(/\b(\d{2,3})R\b/g, "$1 RIGHT");
-        depLine = depLine.replace(/\b(\d{2,3})L\b/g, "$1 LEFT");
-        depLine = depLine.replace(/\b(\d{2,3})C\b/g, "$1 CENTER");
+        // Apply runway letter replacement (25L -> 25 LEFT)
+        depLine = depLine.replace(/(\d{2,3})(L)/g, "$1 LEFT");
+        depLine = depLine.replace(/(\d{2,3})(R)/g, "$1 RIGHT");
+        depLine = depLine.replace(/(\d{2,3})(C)/g, "$1 CENTER");
 
-        arrLine = arrLine.replace(/\b(\d{2,3})R\b/g, "$1 RIGHT");
-        arrLine = arrLine.replace(/\b(\d{2,3})L\b/g, "$1 LEFT");
-        arrLine = arrLine.replace(/\b(\d{2,3})C\b/g, "$1 CENTER");
+        arrLine = arrLine.replace(/(\d{2,3})(L)/g, "$1 LEFT");
+        arrLine = arrLine.replace(/(\d{2,3})(R)/g, "$1 RIGHT");
+        arrLine = arrLine.replace(/(\d{2,3})(C)/g, "$1 CENTER");
 
         lines.push(depLine);
         lines.push(arrLine);
@@ -229,13 +235,6 @@ function formatAtisIntoLines(text) {
 
   return lines;
 }
-
-
-
-
-
-
-
 
 function speakAtisLoop(airport, atis) {
   stopAtisLoop();
