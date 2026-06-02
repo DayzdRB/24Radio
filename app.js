@@ -9,7 +9,7 @@ async function loadfrequencies() {
     const response = await fetch("freq.json");
     if (!response.ok) {
       throw new Error("HTTP error! status: " + response.status);
-    }
+    } 
     const data = await response.json();
     frequencies = data;
     console.log("frequencies loaded:", frequencies);
