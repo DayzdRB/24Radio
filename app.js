@@ -69,6 +69,15 @@ function stopAtisLoop() {
   currentAtisLoop = null;
 }
 
+// Convert digits to aviation pronunciation (9 -> Niner, not Nine)
+function digitsToAviation(numStr) {
+  const digits = numStr.split("");
+  return digits.map(d => {
+    if (d === "9") return "NINER";
+    return d.split("").join(" ");
+  }).join(" ");
+}
+
 function formatAtisIntoLines(text) {
   if (!text) return [];
 
@@ -105,8 +114,8 @@ function formatAtisIntoLines(text) {
       // Process each weather component separately into its own line
       if (windMatch) {
         const [dir, spd] = windMatch[1].split('/');
-        const dirDigits = dir.split("").join(" ");
-        const spdDigits = spd.split("").join(" ");
+        const dirDigits = digitsToAviation(dir);
+        const spdDigits = digitsToAviation(spd);
         lines.push("WIND AT " + dirDigits + " DEGREES AT " + spdDigits + " KNOTS");
       }
 
@@ -124,8 +133,8 @@ function formatAtisIntoLines(text) {
 
       if (tempDewMatch) {
         const [t1, t2] = tempDewMatch[1].split('/');
-        const t1Digits = t1.split("").join(" ");
-        const t2Digits = t2.split("").join(" ");
+        const t1Digits = digitsToAviation(t1);
+        const t2Digits = digitsToAviation(t2);
         lines.push("TEMPERATURE " + t1Digits + " DEW POINT " + t2Digits);
       }
 
@@ -145,28 +154,32 @@ function formatAtisIntoLines(text) {
 
     // 2. Break up ARRIVAL RUNWAY from DEPARTURE RUNWAY on separate lines FIRST (before runway letter replacement)
     if (line.includes("DEPARTURE RUNWAY") && line.includes("ARRIVAL RUNWAY")) {
-      // Split by "ARRIVAL RUNWAY" to get two separate parts
-      const parts = line.split("ARRIVAL RUNWAY");
-      if (parts.length === 2) {
-        let depLine = parts[0].trim();
-        let arrLine = parts[1].trim();
+      // Split by " ARRIVAL RUNWAY " (with spaces) to get two separate parts
+      const splitIndex = line.indexOf(" ARRIVAL RUNWAY ");
+      if (splitIndex !== -1) {
+        let depLine = line.substring(0, splitIndex).trim();
+        let arrLine = line.substring(splitIndex + 1).trim();
 
-        // Clean up depLine (remove leading "RUNWAY" if duplicated)
-        depLine = depLine.replace(/RUNWAY\s+$/g, "").trim();
-        
-        // Add back "RUNWAY" if missing
-        if (!depLine.includes("RUNWAY")) {
-          depLine = depLine + " RUNWAY";
-        }
+        // Apply runway letter replacement with aviation digits (25L -> TWO FIVE LEFT)
+        depLine = depLine.replace(/(\d{1,3})(L)/g, (m, num, letter) => {
+          return digitsToAviation(num) + " LEFT";
+        });
+        depLine = depLine.replace(/(\d{1,3})(R)/g, (m, num, letter) => {
+          return digitsToAviation(num) + " RIGHT";
+        });
+        depLine = depLine.replace(/(\d{1,3})(C)/g, (m, num, letter) => {
+          return digitsToAviation(num) + " CENTER";
+        });
 
-        // Apply runway letter replacement (25L -> 25 LEFT)
-        depLine = depLine.replace(/(\d{2,3})(L)/g, "$1 LEFT");
-        depLine = depLine.replace(/(\d{2,3})(R)/g, "$1 RIGHT");
-        depLine = depLine.replace(/(\d{2,3})(C)/g, "$1 CENTER");
-
-        arrLine = arrLine.replace(/(\d{2,3})(L)/g, "$1 LEFT");
-        arrLine = arrLine.replace(/(\d{2,3})(R)/g, "$1 RIGHT");
-        arrLine = arrLine.replace(/(\d{2,3})(C)/g, "$1 CENTER");
+        arrLine = arrLine.replace(/(\d{1,3})(L)/g, (m, num, letter) => {
+          return digitsToAviation(num) + " LEFT";
+        });
+        arrLine = arrLine.replace(/(\d{1,3})(R)/g, (m, num, letter) => {
+          return digitsToAviation(num) + " RIGHT";
+        });
+        arrLine = arrLine.replace(/(\d{1,3})(C)/g, (m, num, letter) => {
+          return digitsToAviation(num) + " CENTER";
+        });
 
         lines.push(depLine);
         lines.push(arrLine);
@@ -175,9 +188,9 @@ function formatAtisIntoLines(text) {
     }
 
     // 3. Runway designators: 25R -> TWO FIVE RIGHT (for single runway lines)
-    line = line.replace(/\b(\d{2,3})R\b/g, "$1 RIGHT");
-    line = line.replace(/\b(\d{2,3})L\b/g, "$1 LEFT");
-    line = line.replace(/\b(\d{2,3})C\b/g, "$1 CENTER");
+    line = line.replace(/(\d{1,3})R/g, (m, num) => digitsToAviation(num) + " RIGHT");
+    line = line.replace(/(\d{1,3})L/g, (m, num) => digitsToAviation(num) + " LEFT");
+    line = line.replace(/(\d{1,3})C/g, (m, num) => digitsToAviation(num) + " CENTER");
 
     // 4. Time: 1821Z -> ONE EIGHT TWO ONE ZULU
     line = line.replace(/\b(\d{4})Z\b/g, "$1 ZULU");
@@ -219,9 +232,9 @@ function formatAtisIntoLines(text) {
       }
     }
 
-    // 11. General numbers (for altimeter digits, cloud height, etc.)
+    // 11. General numbers (for altimeter digits, cloud height, etc.) - use aviation pronunciation
     line = line.replace(/\b(\d{2,4})\b/g, (match, num) => {
-      return num.split("").join(" ");
+      return digitsToAviation(num);
     });
 
     // 12. Replace remaining / with SLASH (fallback)
