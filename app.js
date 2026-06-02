@@ -1,3 +1,74 @@
+let frequencies = [];
+let activeFreq = null;
+let standbyFreq = null;
+let currentAtisLoop = null;
+let isAtisLooping = false;
+
+async function loadfrequencies() {
+  try {
+    const response = await fetch("freq.json");
+    if (!response.ok) {
+      throw new Error("HTTP error! status: " + response.status);
+    }
+    const data = await response.json();
+    frequencies = data;
+    console.log("frequencies loaded:", frequencies);
+    console.log("total entries: ", frequencies.length);
+  } catch (error) {
+    console.error("Error loading freq.json:", error);
+  }
+}
+
+loadfrequencies();
+
+const activeFreqEl = document.getElementById("active-freq");
+const standbyFreqEl = document.getElementById("standby-freq");
+const freqInput = document.getElementById("freq-input");
+const tuneBtn = document.getElementById("tune-btn");
+const swapBtn = document.getElementById("swap-btn");
+const resultEl = document.getElementById("result");
+
+function updateDisplay() {
+  activeFreqEl.textContent = activeFreq || "---";
+  standbyFreqEl.textContent = standbyFreq || "---";
+}
+
+function findFrequencyByNumber(freqStr) {
+  return frequencies.find(f => f.freq === freqStr);
+}
+
+function showMessage(message) {
+  resultEl.textContent = message;
+}
+
+function isAtisEntry(entry) {
+  return entry && !entry.channelID;
+}
+
+function getAirportFromAtisName(name) {
+  if (!name) return null;
+  const parts = name.split("_");
+  return parts[0] || null;
+}
+
+async function fetchAllAtis() {
+  const res = await fetch("/api/atis");
+  if (!res.ok) {
+    throw new Error("Failed to fetch ATIS: " + res.status);
+  }
+  return res.json();
+}
+
+function getAtisForAirport(allAtis, airport) {
+  return allAtis.find(a => a.airport === airport);
+}
+
+function stopAtisLoop() {
+  speechSynthesis.cancel();
+  isAtisLooping = false;
+  currentAtisLoop = null;
+}
+
 function formatAtisIntoLines(text) {
   if (!text) return [];
 
@@ -18,6 +89,54 @@ function formatAtisIntoLines(text) {
     let line = rawLine.toUpperCase().trim();
     if (!line) continue;
 
+    // Check if this is a weather line (has raw weather data like 316/05 9999 FEW021 04/09 Q1012)
+    const isWeatherLine = line.match(/\d{3}\/\d{2}/) || line.match(/\b9999\b/) || 
+                          line.match(/(?:BKN|SCT|OVC|FEW)\d{2,3}/) || 
+                          line.match(/\b\d{2}\/\d{2}\b/) || line.match(/\bQ\d{4}\b/);
+
+    if (isWeatherLine) {
+      // Extract raw weather components FIRST, before any text replacements
+      const windMatch = line.match(/(\d{3}\/\d{2})/);
+      const visMatch = line.match(/\b(9999)\b/);
+      const cloudsMatch = line.match(/((?:BKN|SCT|OVC|FEW)(\d{2,3}))/);
+      const tempDewMatch = line.match(/\b(\d{2}\/\d{2})\b/);
+      const qnhMatch = line.match(/\b(Q\d{4})\b/);
+
+      // Process each weather component separately into its own line
+      if (windMatch) {
+        const [dir, spd] = windMatch[1].split('/');
+        const dirDigits = dir.split("").join(" ");
+        const spdDigits = spd.split("").join(" ");
+        lines.push("WIND AT " + dirDigits + " DEGREES AT " + spdDigits + " KNOTS");
+      }
+
+      if (visMatch) {
+        lines.push("VISIBILITY NINE NINE NINE NINE");
+      }
+
+      if (cloudsMatch) {
+        const cloudType = cloudsMatch[1].match(/(BKN|SCT|OVC|FEW)/)[0];
+        const cloudHeight = cloudsMatch[2];
+        const heightDigits = cloudHeight.split("").join(" ");
+        const cloudNames = { "BKN": "BROKEN", "SCT": "SCATTERED", "OVC": "OVERCAST", "FEW": "FEW" };
+        lines.push(cloudNames[cloudType] + " CLOUDS AT " + heightDigits);
+      }
+
+      if (tempDewMatch) {
+        const [t1, t2] = tempDewMatch[1].split('/');
+        const t1Digits = t1.split("").join(" ");
+        const t2Digits = t2.split("").join(" ");
+        lines.push("TEMPERATURE " + t1Digits + " DEW POINT " + t2Digits);
+      }
+
+      if (qnhMatch) {
+        const qnhDigits = qnhMatch[1].substring(1).split("").join(" ");
+        lines.push("QNH " + qnhDigits);
+      }
+
+      continue;
+    }
+
     // 1. Expand common abbreviations
     line = line.replace(/\bRWY\b/g, "RUNWAY");
     line = line.replace(/\bDEP\b/g, "DEPARTURE");
@@ -36,11 +155,11 @@ function formatAtisIntoLines(text) {
     // 4. Altimeter: Q1012 -> QNH 1012 (keep digits for later processing)
     line = line.replace(/\bQ(\d{4})\b/g, "QNH $1");
 
-    // 5. Cloud layers
-    line = line.replace(/\bBKN(\d{2,3})\b/g, "BROKEN\x00CLOUDS AT $1");
-    line = line.replace(/\bSCT(\d{2,3})\b/g, "SCATTERED\x00CLOUDS AT $1");
-    line = line.replace(/\bOVC(\d{2,3})\b/g, "OVERCAST\x00CLOUDS AT $1");
-    line = line.replace(/\bFEW(\d{2,3})\b/g, "FEW\x00CLOUDS AT $1");
+    // 5. Cloud layers (for non-weather lines)
+    line = line.replace(/\bBKN(\d{2,3})\b/g, "BROKEN CLOUDS AT $1");
+    line = line.replace(/\bSCT(\d{2,3})\b/g, "SCATTERED CLOUDS AT $1");
+    line = line.replace(/\bOVC(\d{2,3})\b/g, "OVERCAST CLOUDS AT $1");
+    line = line.replace(/\bFEW(\d{2,3})\b/g, "FEW CLOUDS AT $1");
 
     // 6. Transition level
     line = line.replace(/\bLEVEL\s+(\d{2,3})\b/g, "LEVEL $1");
@@ -57,72 +176,7 @@ function formatAtisIntoLines(text) {
       return "INFORMATION " + phoneticLetter;
     });
 
-    // 9. Split weather line by spaces into separate lines BEFORE processing
-    // First, protect cloud codes from being split (use \x00 as placeholder)
-    // Then split by spaces and rejoin protected parts
-    const weatherParts = [];
-    
-    // Check if this is a weather line (has wind, vis, clouds, temp/dew, QNH)
-    if (line.match(/\d{3}\/\d{2}/) || line.match(/9999/) || line.match(/(BKN|SCT|OVC|FEW)\d{2,3}/) || line.match(/\d{2}\/\d{2}/) || line.match(/QNH/)) {
-      // Split weather line into components
-      const windMatch = line.match(/(\d{3}\/\d{2})/);
-      const visMatch = line.match(/(9999)/);
-      const cloudsMatch = line.match(/((?:BKN|SCT|OVC|FEW)\d{2,3})/);
-      const tempDewMatch = line.match(/(\d{2}\/\d{2})/);
-      const qnhMatch = line.match(/(QNH\d{4})/);
-      
-      if (windMatch) weatherParts.push("WIND " + windMatch[1]);
-      if (visMatch) weatherParts.push("VISIBILITY " + visMatch[1]);
-      if (cloudsMatch) weatherParts.push("CLOUDS " + cloudsMatch[1]);
-      if (tempDewMatch) weatherParts.push("TEMP " + tempDewMatch[1]);
-      if (qnhMatch) weatherParts.push(qnhMatch[1]);
-      
-      // Process each weather part separately
-      for (let part of weatherParts) {
-        let weatherLine = part;
-        
-        // Wind: 316/05 -> WIND AT THREE ONE SIX DEGREES AT ZERO FIVE KNOTS
-        weatherLine = weatherLine.replace(/(\d{3})\/(\d{2})/, (match, dir, spd) => {
-          const dirDigits = dir.split("").join(" ");
-          const spdDigits = spd.split("").join(" ");
-          return "WIND AT " + dirDigits + " DEGREES AT " + spdDigits + " KNOTS";
-        });
-        
-        // Visibility: 9999 -> VISIBILITY NINE NINE NINE NINE
-        weatherLine = weatherLine.replace(/9999/, "VISIBILITY NINE NINE NINE NINE");
-        
-        // Clouds: FEW021 -> FEW CLOUDS AT TWO ONE
-        weatherLine = weatherLine.replace(/(BKN)(\d{2,3})/, "BROKEN CLOUDS AT $2");
-        weatherLine = weatherLine.replace(/(SCT)(\d{2,3})/, "SCATTERED CLOUDS AT $2");
-        weatherLine = weatherLine.replace(/(OVC)(\d{2,3})/, "OVERCAST CLOUDS AT $2");
-        weatherLine = weatherLine.replace(/(FEW)(\d{2,3})/, "FEW CLOUDS AT $2");
-        
-        // Temp/dew: 04/09 -> TEMPERATURE ZERO FOUR, DEW POINT ZERO NINE
-        weatherLine = weatherLine.replace(/(\d{2})\/(\d{2})/, (match, t1, t2) => {
-          const t1Digits = t1.split("").join(" ");
-          const t2Digits = t2.split("").join(" ");
-          return "TEMPERATURE " + t1Digits + " DEW POINT " + t2Digits;
-        });
-        
-        // QNH: QNH1012 -> QNH ONE ZERO ONE TWO
-        weatherLine = weatherLine.replace(/QNH(\d{4})/, (match, qnh) => {
-          return "QNH " + qnh.split("").join(" ");
-        });
-        
-        // General numbers
-        weatherLine = weatherLine.replace(/\b(\d{2,4})\b/g, (match, num) => {
-          return num.split("").join(" ");
-        });
-        
-        // ATIS
-        weatherLine = weatherLine.replace(/\bATIS\b/g, "Atis");
-        
-        lines.push(weatherLine.trim());
-      }
-      continue;
-    }
-
-    // 10. Break up ARRIVAL RUNWAY from DEPARTURE RUNWAY on separate lines
+    // 9. Break up ARRIVAL RUNWAY from DEPARTURE RUNWAY on separate lines
     if (line.includes("DEPARTURE") && line.includes("ARRIVAL")) {
       const depMatch = line.match(/DEPARTURE RUNWAY [^\s]+/);
       const arrMatch = line.match(/ARRIVAL RUNWAY [^\s]+/);
@@ -134,7 +188,7 @@ function formatAtisIntoLines(text) {
       }
     }
 
-    // 11. Split ATIS INFO line into separate parts: "ISAU ATIS INFO V" and "TIME 1821Z"
+    // 10. Split ATIS INFO line into separate parts: "ISAU ATIS INFO V" and "TIME 1821Z"
     if (line.match(/ATIS INFO [A-Z]+ TIME/)) {
       const atisInfoMatch = line.match(/^[^\s]+ ATIS INFO [A-Z]+/);
       const timeMatch = line.match(/TIME [^\s]+/);
@@ -146,15 +200,15 @@ function formatAtisIntoLines(text) {
       }
     }
 
-    // 12. General numbers (for altimeter digits, cloud height, etc.)
+    // 11. General numbers (for altimeter digits, cloud height, etc.)
     line = line.replace(/\b(\d{2,4})\b/g, (match, num) => {
       return num.split("").join(" ");
     });
 
-    // 13. Replace remaining / with SLASH (fallback)
+    // 12. Replace remaining / with SLASH (fallback)
     line = line.replace(/\//g, " SLASH ");
 
-    // 14. Force ATIS to be pronounced as one word: "Atis"
+    // 13. Force ATIS to be pronounced as one word: "Atis"
     line = line.replace(/\bATIS\b/g, "Atis");
 
     lines.push(line);
@@ -162,3 +216,147 @@ function formatAtisIntoLines(text) {
 
   return lines;
 }
+
+function speakAtisLoop(airport, atis) {
+  stopAtisLoop();
+
+  const atisLines = formatAtisIntoLines(atis.content);
+  if (atisLines.length === 0) {
+    showMessage("ATIS fetched for " + airport + ", but no content to speak.");
+    return;
+  }
+
+  let currentIndex = 0;
+  isAtisLooping = true;
+  currentAtisLoop = { airport, atis, lines: atisLines, index: currentIndex };
+
+  function speakNextLine() {
+    if (!isAtisLooping || currentAtisLoop?.airport !== airport) return;
+
+    const line = atisLines[currentIndex];
+
+    const utterance = new SpeechSynthesisUtterance(line);
+    utterance.rate = 0.85;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+
+    utterance.onend = function () {
+      currentIndex++;
+      if (currentIndex < atisLines.length) {
+        setTimeout(speakNextLine, 1000);
+      } else {
+        setTimeout(() => {
+          if (isAtisLooping && currentAtisLoop?.airport === airport) {
+            currentIndex = 0;
+            speakNextLine();
+          }
+        }, 3000);
+      }
+    };
+
+    utterance.onerror = function (err) {
+      console.error("Speech error:", err);
+      isAtisLooping = false;
+    };
+
+    speechSynthesis.speak(utterance);
+  }
+
+  showMessage("ATIS fetched for " + airport + ". Speaking...");
+  speakNextLine();
+}
+
+function speakText(text) {
+  speechSynthesis.cancel();
+  isAtisLooping = false;
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 1.0;
+  utterance.pitch = 1.0;
+  utterance.volume = 1.0;
+
+  speechSynthesis.speak(utterance);
+}
+
+tuneBtn.addEventListener("click", async () => {
+  const input = freqInput.value.trim();
+  const entry = findFrequencyByNumber(input);
+
+  if (!entry) {
+    showMessage("Frequency not found: " + input);
+    return;
+  }
+
+  console.log("Entry:", entry);
+  console.log("Is ATIS?", isAtisEntry(entry));
+  console.log("Airport:", getAirportFromAtisName(entry.name));
+
+  stopAtisLoop();
+
+  standbyFreq = entry.freq;
+  updateDisplay();
+
+  const displayName = entry.name || "Unknown";
+  const freqDisplay = entry.freq || input;
+
+  if (isAtisEntry(entry)) {
+    const airport = getAirportFromAtisName(entry.name);
+    showMessage("Tuned to ATIS: " + displayName + " — " + freqDisplay);
+
+    if (airport) {
+      try {
+        const allAtis = await fetchAllAtis();
+        const atis = getAtisForAirport(allAtis, airport);
+
+        if (atis) {
+          speakAtisLoop(airport, atis);
+        } else {
+          showMessage("ATIS not found for " + airport);
+        }
+      } catch (err) {
+        console.error("Error fetching ATIS:", err);
+        showMessage("Failed to fetch ATIS for " + airport);
+      }
+    }
+  } else {
+    showMessage("Tuned to: " + displayName + " — " + freqDisplay);
+  }
+});
+
+swapBtn.addEventListener("click", async () => {
+  if (!standbyFreq) {
+    showMessage("No standby frequency to swap.");
+    return;
+  }
+
+  stopAtisLoop();
+
+  const temp = activeFreq;
+  activeFreq = standbyFreq;
+  standbyFreq = temp;
+
+  updateDisplay();
+  showMessage("Swapped. Active: " + activeFreq);
+
+  const activeEntry = frequencies.find(f => f.freq === activeFreq);
+  if (activeEntry && isAtisEntry(activeEntry)) {
+    const airport = getAirportFromAtisName(activeEntry.name);
+    if (airport) {
+      try {
+        const allAtis = await fetchAllAtis();
+        const atis = getAtisForAirport(allAtis, airport);
+
+        if (atis) {
+          speakAtisLoop(airport, atis);
+        } else {
+          showMessage("ATIS not found for " + airport);
+        }
+      } catch (err) {
+        console.error("Error fetching ATIS after swap:", err);
+        showMessage("Failed to fetch ATIS for " + airport);
+      }
+    }
+  }
+});
+
+updateDisplay();
