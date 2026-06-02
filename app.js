@@ -37,10 +37,10 @@ function formatAtisIntoLines(text) {
     line = line.replace(/\bQ(\d{4})\b/g, "QNH $1");
 
     // 5. Cloud layers
-    line = line.replace(/\bBKN(\d{2,3})\b/g, "BROKEN CLOUDS AT $1");
-    line = line.replace(/\bSCT(\d{2,3})\b/g, "SCATTERED CLOUDS AT $1");
-    line = line.replace(/\bOVC(\d{2,3})\b/g, "OVERCAST CLOUDS AT $1");
-    line = line.replace(/\bFEW(\d{2,3})\b/g, "FEW CLOUDS AT $1");
+    line = line.replace(/\bBKN(\d{2,3})\b/g, "BROKEN\x00CLOUDS AT $1");
+    line = line.replace(/\bSCT(\d{2,3})\b/g, "SCATTERED\x00CLOUDS AT $1");
+    line = line.replace(/\bOVC(\d{2,3})\b/g, "OVERCAST\x00CLOUDS AT $1");
+    line = line.replace(/\bFEW(\d{2,3})\b/g, "FEW\x00CLOUDS AT $1");
 
     // 6. Transition level
     line = line.replace(/\bLEVEL\s+(\d{2,3})\b/g, "LEVEL $1");
@@ -57,50 +57,72 @@ function formatAtisIntoLines(text) {
       return "INFORMATION " + phoneticLetter;
     });
 
-    // 9. Wind: 316/05 -> WIND AT THREE ONE SIX DEGREES AT ZERO FIVE KNOTS
-    line = line.replace(/\b(\d{3})\/(\d{2})\b/g, (match, dir, spd) => {
-      const dirDigits = dir.split("").join(" ");
-      const spdDigits = spd.split("").join(" ");
-      return "WIND AT " + dirDigits + " DEGREES AT " + spdDigits + " KNOTS";
-    });
-
-    // Visibility: 9999 -> VISIBILITY NINE NINE NINE NINE
-    line = line.replace(/\b9999\b/g, "VISIBILITY NINE NINE NINE NINE");
-
-    // Temperature/dew: 04/09 -> TEMPERATURE ZERO FOUR, DEW POINT ZERO NINE
-    line = line.replace(/\b(\d{2})\/(\d{2})\b/g, (match, t1, t2) => {
-      const t1Digits = t1.split("").join(" ");
-      const t2Digits = t2.split("").join(" ");
-      return "TEMPERATURE " + t1Digits + ", DEW POINT " + t2Digits;
-    });
-
-    // 10. Split weather line into separate lines: wind, visibility, clouds, temp, dew, QNH
-    // Check if line has multiple weather items separated by spaces
-    if (line.match(/WIND AT.*KNOTS.*VISIBILITY/) ||
-        line.match(/WIND AT.*KNOTS.*CLOUDS AT/) ||
-        line.match(/WIND AT.*KNOTS.*TEMPERATURE/) ||
-        line.match(/VISIBILITY.*CLOUDS AT/) ||
-        line.match(/VISIBILITY.*TEMPERATURE/) ||
-        line.match(/CLOUDS AT.*TEMPERATURE/) ||
-        line.match(/QNH.*ONE ZERO/)) {
-
-      // Extract each weather component into its own line
-      const windMatch = line.match(/WIND AT [^V]+KNOTS/);
-      const visMatch = line.match(/VISIBILITY [^C]+/);
-      const cloudsMatch = line.match(/(BROKEN|SCATTERED|OVERCAST|FEW) CLOUDS AT [^\sT]+/);
-      const tempMatch = line.match(/TEMPERATURE [^Q]+/);
-      const qnhMatch = line.match(/QNH [^\s]+/);
-
-      if (windMatch) lines.push(windMatch[0].trim());
-      if (visMatch) lines.push(visMatch[0].trim());
-      if (cloudsMatch) lines.push(cloudsMatch[0].trim());
-      if (tempMatch) lines.push(tempMatch[0].trim());
-      if (qnhMatch) lines.push(qnhMatch[0].trim());
-
+    // 9. Split weather line by spaces into separate lines BEFORE processing
+    // First, protect cloud codes from being split (use \x00 as placeholder)
+    // Then split by spaces and rejoin protected parts
+    const weatherParts = [];
+    
+    // Check if this is a weather line (has wind, vis, clouds, temp/dew, QNH)
+    if (line.match(/\d{3}\/\d{2}/) || line.match(/9999/) || line.match(/(BKN|SCT|OVC|FEW)\d{2,3}/) || line.match(/\d{2}\/\d{2}/) || line.match(/QNH/)) {
+      // Split weather line into components
+      const windMatch = line.match(/(\d{3}\/\d{2})/);
+      const visMatch = line.match(/(9999)/);
+      const cloudsMatch = line.match(/((?:BKN|SCT|OVC|FEW)\d{2,3})/);
+      const tempDewMatch = line.match(/(\d{2}\/\d{2})/);
+      const qnhMatch = line.match(/(QNH\d{4})/);
+      
+      if (windMatch) weatherParts.push("WIND " + windMatch[1]);
+      if (visMatch) weatherParts.push("VISIBILITY " + visMatch[1]);
+      if (cloudsMatch) weatherParts.push("CLOUDS " + cloudsMatch[1]);
+      if (tempDewMatch) weatherParts.push("TEMP " + tempDewMatch[1]);
+      if (qnhMatch) weatherParts.push(qnhMatch[1]);
+      
+      // Process each weather part separately
+      for (let part of weatherParts) {
+        let weatherLine = part;
+        
+        // Wind: 316/05 -> WIND AT THREE ONE SIX DEGREES AT ZERO FIVE KNOTS
+        weatherLine = weatherLine.replace(/(\d{3})\/(\d{2})/, (match, dir, spd) => {
+          const dirDigits = dir.split("").join(" ");
+          const spdDigits = spd.split("").join(" ");
+          return "WIND AT " + dirDigits + " DEGREES AT " + spdDigits + " KNOTS";
+        });
+        
+        // Visibility: 9999 -> VISIBILITY NINE NINE NINE NINE
+        weatherLine = weatherLine.replace(/9999/, "VISIBILITY NINE NINE NINE NINE");
+        
+        // Clouds: FEW021 -> FEW CLOUDS AT TWO ONE
+        weatherLine = weatherLine.replace(/(BKN)(\d{2,3})/, "BROKEN CLOUDS AT $2");
+        weatherLine = weatherLine.replace(/(SCT)(\d{2,3})/, "SCATTERED CLOUDS AT $2");
+        weatherLine = weatherLine.replace(/(OVC)(\d{2,3})/, "OVERCAST CLOUDS AT $2");
+        weatherLine = weatherLine.replace(/(FEW)(\d{2,3})/, "FEW CLOUDS AT $2");
+        
+        // Temp/dew: 04/09 -> TEMPERATURE ZERO FOUR, DEW POINT ZERO NINE
+        weatherLine = weatherLine.replace(/(\d{2})\/(\d{2})/, (match, t1, t2) => {
+          const t1Digits = t1.split("").join(" ");
+          const t2Digits = t2.split("").join(" ");
+          return "TEMPERATURE " + t1Digits + " DEW POINT " + t2Digits;
+        });
+        
+        // QNH: QNH1012 -> QNH ONE ZERO ONE TWO
+        weatherLine = weatherLine.replace(/QNH(\d{4})/, (match, qnh) => {
+          return "QNH " + qnh.split("").join(" ");
+        });
+        
+        // General numbers
+        weatherLine = weatherLine.replace(/\b(\d{2,4})\b/g, (match, num) => {
+          return num.split("").join(" ");
+        });
+        
+        // ATIS
+        weatherLine = weatherLine.replace(/\bATIS\b/g, "Atis");
+        
+        lines.push(weatherLine.trim());
+      }
       continue;
     }
 
-    // 11. Break up ARRIVAL RUNWAY from DEPARTURE RUNWAY on separate lines
+    // 10. Break up ARRIVAL RUNWAY from DEPARTURE RUNWAY on separate lines
     if (line.includes("DEPARTURE") && line.includes("ARRIVAL")) {
       const depMatch = line.match(/DEPARTURE RUNWAY [^\s]+/);
       const arrMatch = line.match(/ARRIVAL RUNWAY [^\s]+/);
@@ -112,7 +134,7 @@ function formatAtisIntoLines(text) {
       }
     }
 
-    // 12. Split ATIS INFO line into separate parts: "ISAU ATIS INFO V" and "TIME 1821Z"
+    // 11. Split ATIS INFO line into separate parts: "ISAU ATIS INFO V" and "TIME 1821Z"
     if (line.match(/ATIS INFO [A-Z]+ TIME/)) {
       const atisInfoMatch = line.match(/^[^\s]+ ATIS INFO [A-Z]+/);
       const timeMatch = line.match(/TIME [^\s]+/);
@@ -124,16 +146,15 @@ function formatAtisIntoLines(text) {
       }
     }
 
-    // 13. General numbers (for altimeter digits, cloud height, etc.)
-    // Reads 1012 as "ONE ZERO ONE TWO" not "ONE THOUSAND"
+    // 12. General numbers (for altimeter digits, cloud height, etc.)
     line = line.replace(/\b(\d{2,4})\b/g, (match, num) => {
       return num.split("").join(" ");
     });
 
-    // 14. Replace remaining / with SLASH (fallback)
+    // 13. Replace remaining / with SLASH (fallback)
     line = line.replace(/\//g, " SLASH ");
 
-    // 15. Force ATIS to be pronounced as one word: "Atis" (do this LAST, after toUpperCase)
+    // 14. Force ATIS to be pronounced as one word: "Atis"
     line = line.replace(/\bATIS\b/g, "Atis");
 
     lines.push(line);
