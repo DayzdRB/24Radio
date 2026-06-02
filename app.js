@@ -89,56 +89,85 @@ function formatAtisIntoLines(text) {
     let line = rawLine.toUpperCase().trim();
     if (!line) continue;
 
+    // 1. Expand common abbreviations
     line = line.replace(/\bRWY\b/g, "RUNWAY");
     line = line.replace(/\bDEP\b/g, "DEPARTURE");
     line = line.replace(/\bARR\b/g, "ARRIVAL");
     line = line.replace(/\bAFCT\b/g, "AIRCRAFT");
 
+    // 2. Runway designators: 25R -> TWO FIVE RIGHT
     line = line.replace(/\b(\d{2,3})R\b/g, "$1 RIGHT");
     line = line.replace(/\b(\d{2,3})L\b/g, "$1 LEFT");
     line = line.replace(/\b(\d{2,3})C\b/g, "$1 CENTER");
 
+    // 3. Time: 1821Z -> ONE EIGHT TWO ONE ZULU
     line = line.replace(/\b(\d{4})Z\b/g, "$1 ZULU");
     line = line.replace(/\bZ\b/g, " ZULU ");
 
+    // 4. Altimeter: Q1012 -> QNH 1012 (keep digits for later processing)
     line = line.replace(/\bQ(\d{4})\b/g, "QNH $1");
 
+    // 5. Cloud layers
     line = line.replace(/\bBKN(\d{2,3})\b/g, "BROKEN CLOUDS AT $1");
     line = line.replace(/\bSCT(\d{2,3})\b/g, "SCATTERED CLOUDS AT $1");
     line = line.replace(/\bOVC(\d{2,3})\b/g, "OVERCAST CLOUDS AT $1");
     line = line.replace(/\bFEW(\d{2,3})\b/g, "FEW CLOUDS AT $1");
 
+    // 6. Transition level
     line = line.replace(/\bLEVEL\s+(\d{2,3})\b/g, "LEVEL $1");
 
+    // 7. Replace "INFO X" or "INFORMATION X" with phonetic letter
     line = line.replace(/\bINFO(?:RMATION)?\s+([A-Z])\b/g, (match, letter) => {
       const phoneticLetter = phonetic[letter] || letter;
       return "INFO " + phoneticLetter;
     });
 
+    // 8. Replace "INFORMATION X" explicitly
     line = line.replace(/INFORMATION\s+([A-Z])\b/g, (match, letter) => {
       const phoneticLetter = phonetic[letter] || letter;
       return "INFORMATION " + phoneticLetter;
     });
 
+    // 9. Wind: 316/05 -> WIND AT THREE ONE SIX DEGREES AT ZERO FIVE KNOTS
     line = line.replace(/\b(\d{3})\/(\d{2})\b/g, (match, dir, spd) => {
       const dirDigits = dir.split("").join(" ");
       const spdDigits = spd.split("").join(" ");
       return "WIND AT " + dirDigits + " DEGREES AT " + spdDigits + " KNOTS";
     });
 
+    // Visibility: 9999 -> VISIBILITY NINE NINE NINE NINE
     line = line.replace(/\b9999\b/g, "VISIBILITY NINE NINE NINE NINE");
 
+    // Temperature/dew: 04/09 -> TEMPERATURE ZERO FOUR, DEW POINT ZERO NINE
     line = line.replace(/\b(\d{2})\/(\d{2})\b/g, (match, t1, t2) => {
       const t1Digits = t1.split("").join(" ");
       const t2Digits = t2.split("").join(" ");
       return "TEMPERATURE " + t1Digits + ", DEW POINT " + t2Digits;
     });
 
-    line = line.replace(/\b(\d{2,3})\b/g, (match, num) => {
+    // 10. Break up ARRIVAL RUNWAY from DEPARTURE RUNWAY on separate lines
+    if (line.includes("DEPARTURE") && line.includes("ARRIVAL")) {
+      const depMatch = line.match(/DEPARTURE RUNWAY [^\s]+/);
+      const arrMatch = line.match(/ARRIVAL RUNWAY [^\s]+/);
+
+      if (depMatch && arrMatch) {
+        lines.push(depMatch[0].trim());
+        lines.push(arrMatch[0].trim());
+        continue;
+      }
+    }
+
+    // 11. General numbers (for altimeter digits, cloud height, etc.)
+    // Reads 1012 as "ONE ZERO ONE TWO" not "ONE THOUSAND"
+    line = line.replace(/\b(\d{2,4})\b/g, (match, num) => {
       return num.split("").join(" ");
     });
 
+    // 12. Replace remaining / with SLASH (fallback)
     line = line.replace(/\//g, " SLASH ");
+
+    // 13. Force ATIS to be pronounced as one word: "Atis" (do this LAST, after toUpperCase)
+    // We replace "ATIS" with "Atis" to force TTS to read it as one word
     line = line.replace(/\bATIS\b/g, "Atis");
 
     lines.push(line);
@@ -166,21 +195,21 @@ function speakAtisLoop(airport, atis) {
     const line = atisLines[currentIndex];
 
     const utterance = new SpeechSynthesisUtterance(line);
-    utterance.rate = 0.9;
+    utterance.rate = 0.85;  // Slower for better clarity
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
 
     utterance.onend = function () {
       currentIndex++;
       if (currentIndex < atisLines.length) {
-        setTimeout(speakNextLine, 800);
+        setTimeout(speakNextLine, 1000); // 1 second pause between lines
       } else {
         setTimeout(() => {
           if (isAtisLooping && currentAtisLoop?.airport === airport) {
             currentIndex = 0;
             speakNextLine();
           }
-        }, 2000);
+        }, 3000); // 3 second pause before looping
       }
     };
 
