@@ -69,6 +69,7 @@ function stopAtisLoop() {
   currentAtisLoop = null;
 }
 
+
 function formatAtisIntoLines(text) {
   if (!text) return [];
 
@@ -143,50 +144,62 @@ function formatAtisIntoLines(text) {
     line = line.replace(/\bARR\b/g, "ARRIVAL");
     line = line.replace(/\bAFCT\b/g, "AIRCRAFT");
 
-    // 2. Runway designators: 25R -> TWO FIVE RIGHT
+    // 2. Break up ARRIVAL RUNWAY from DEPARTURE RUNWAY on separate lines FIRST (before runway letter replacement)
+    if (line.includes("DEPARTURE") && line.includes("ARRIVAL")) {
+      const depMatch = line.match(/DEPARTURE RUNWAY \d+[LCR]?/);
+      const arrMatch = line.match(/ARRIVAL RUNWAY \d+[LCR]?/);
+
+      if (depMatch && arrMatch) {
+        let depLine = depMatch[0].trim();
+        let arrLine = arrMatch[0].trim();
+
+        // Now apply runway letter replacement to each line
+        depLine = depLine.replace(/\b(\d{2,3})R\b/g, "$1 RIGHT");
+        depLine = depLine.replace(/\b(\d{2,3})L\b/g, "$1 LEFT");
+        depLine = depLine.replace(/\b(\d{2,3})C\b/g, "$1 CENTER");
+
+        arrLine = arrLine.replace(/\b(\d{2,3})R\b/g, "$1 RIGHT");
+        arrLine = arrLine.replace(/\b(\d{2,3})L\b/g, "$1 LEFT");
+        arrLine = arrLine.replace(/\b(\d{2,3})C\b/g, "$1 CENTER");
+
+        lines.push(depLine);
+        lines.push(arrLine);
+        continue;
+      }
+    }
+
+    // 3. Runway designators: 25R -> TWO FIVE RIGHT (for single runway lines)
     line = line.replace(/\b(\d{2,3})R\b/g, "$1 RIGHT");
     line = line.replace(/\b(\d{2,3})L\b/g, "$1 LEFT");
     line = line.replace(/\b(\d{2,3})C\b/g, "$1 CENTER");
 
-    // 3. Time: 1821Z -> ONE EIGHT TWO ONE ZULU
+    // 4. Time: 1821Z -> ONE EIGHT TWO ONE ZULU
     line = line.replace(/\b(\d{4})Z\b/g, "$1 ZULU");
     line = line.replace(/\bZ\b/g, " ZULU ");
 
-    // 4. Altimeter: Q1012 -> QNH 1012 (keep digits for later processing)
+    // 5. Altimeter: Q1012 -> QNH 1012 (keep digits for later processing)
     line = line.replace(/\bQ(\d{4})\b/g, "QNH $1");
 
-    // 5. Cloud layers (for non-weather lines)
+    // 6. Cloud layers (for non-weather lines)
     line = line.replace(/\bBKN(\d{2,3})\b/g, "BROKEN CLOUDS AT $1");
     line = line.replace(/\bSCT(\d{2,3})\b/g, "SCATTERED CLOUDS AT $1");
     line = line.replace(/\bOVC(\d{2,3})\b/g, "OVERCAST CLOUDS AT $1");
     line = line.replace(/\bFEW(\d{2,3})\b/g, "FEW CLOUDS AT $1");
 
-    // 6. Transition level
+    // 7. Transition level
     line = line.replace(/\bLEVEL\s+(\d{2,3})\b/g, "LEVEL $1");
 
-    // 7. Replace "INFO X" or "INFORMATION X" with phonetic letter
+    // 8. Replace "INFO X" or "INFORMATION X" with phonetic letter
     line = line.replace(/\bINFO(?:RMATION)?\s+([A-Z])\b/g, (match, letter) => {
       const phoneticLetter = phonetic[letter] || letter;
       return "INFO " + phoneticLetter;
     });
 
-    // 8. Replace "INFORMATION X" explicitly
+    // 9. Replace "INFORMATION X" explicitly
     line = line.replace(/INFORMATION\s+([A-Z])\b/g, (match, letter) => {
       const phoneticLetter = phonetic[letter] || letter;
       return "INFORMATION " + phoneticLetter;
     });
-
-    // 9. Break up ARRIVAL RUNWAY from DEPARTURE RUNWAY on separate lines
-    if (line.includes("DEPARTURE") && line.includes("ARRIVAL")) {
-      const depMatch = line.match(/DEPARTURE RUNWAY [^\s]+/);
-      const arrMatch = line.match(/ARRIVAL RUNWAY [^\s]+/);
-
-      if (depMatch && arrMatch) {
-        lines.push(depMatch[0].trim());
-        lines.push(arrMatch[0].trim());
-        continue;
-      }
-    }
 
     // 10. Split ATIS INFO line into separate parts: "ISAU ATIS INFO V" and "TIME 1821Z"
     if (line.match(/ATIS INFO [A-Z]+ TIME/)) {
@@ -216,6 +229,13 @@ function formatAtisIntoLines(text) {
 
   return lines;
 }
+
+
+
+
+
+
+
 
 function speakAtisLoop(airport, atis) {
   stopAtisLoop();
