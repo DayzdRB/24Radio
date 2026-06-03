@@ -164,10 +164,14 @@ function formatAtisIntoLines(text) {
         depLine = depLine.replace(/(\d{1,3})(L)/g, (m, num) => digitsToAviation(num) + " LEFT");
         depLine = depLine.replace(/(\d{1,3})(R)/g, (m, num) => digitsToAviation(num) + " RIGHT");
         depLine = depLine.replace(/(\d{1,3})(C)/g, (m, num) => digitsToAviation(num) + " CENTER");
+        // Catch runway numbers WITHOUT L/R/C (e.g., "RUNWAY 27" -> "RUNWAY 2 7")
+        depLine = depLine.replace(/RUNWAY\s+(\d{1,2})/g, (m, num) => "RUNWAY " + digitsToAviation(num));
 
         arrLine = arrLine.replace(/(\d{1,3})(L)/g, (m, num) => digitsToAviation(num) + " LEFT");
         arrLine = arrLine.replace(/(\d{1,3})(R)/g, (m, num) => digitsToAviation(num) + " RIGHT");
         arrLine = arrLine.replace(/(\d{1,3})(C)/g, (m, num) => digitsToAviation(num) + " CENTER");
+        // Catch runway numbers WITHOUT L/R/C
+        arrLine = arrLine.replace(/RUNWAY\s+(\d{1,2})/g, (m, num) => "RUNWAY " + digitsToAviation(num));
 
         lines.push(depLine);
         lines.push(arrLine);
@@ -178,6 +182,8 @@ function formatAtisIntoLines(text) {
     line = line.replace(/(\d{1,3})R/g, (m, num) => digitsToAviation(num) + " RIGHT");
     line = line.replace(/(\d{1,3})L/g, (m, num) => digitsToAviation(num) + " LEFT");
     line = line.replace(/(\d{1,3})C/g, (m, num) => digitsToAviation(num) + " CENTER");
+    // Catch standalone runway numbers (e.g., "RUNWAY 27")
+    line = line.replace(/RUNWAY\s+(\d{1,2})/g, (m, num) => "RUNWAY " + digitsToAviation(num));
 
     line = line.replace(/\b(\d{4})Z\b/g, (m, num) => digitsToAviation(num) + " ZULU");
     line = line.replace(/\bZ\b/g, " ZULU ");
