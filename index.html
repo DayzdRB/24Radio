@@ -122,7 +122,7 @@
 
     .freq-row {
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: center;
       gap: 15px;
       margin-bottom: 15px;
@@ -131,41 +131,7 @@
     .freq-box-wrapper {
       display: flex;
       flex-direction: column;
+      justify-content: flex-end;
     }
 
-    .freq-label {
-      font-size: 12px;
-      color: #0f0;
-      margin-bottom: 5px;
-    }
-  </style>
-</head>
-<body>
-  <h1>24Radio</h1>
-
-  <div id="radio-panel">
-    <div class="freq-row">
-      <div class="freq-box-wrapper">
-        <div class="freq-label">COM1 ACTIVE</div>
-        <div id="active-freq">---</div>
-      </div>
-      <div class="freq-box-wrapper">
-        <div class="freq-label">COM1 STANDBY</div>
-        <input type="text" id="standby-freq" placeholder="118.100" maxlength="7">
-      </div>
-      <button id="swap-btn">SWAP</button>
-    </div>
-
-    <div class="knob-container">
-      <div class="knob" id="freq-knob">
-        <div class="knob-marker"></div>
-      </div>
-      <div class="knob-label">TUNE</div>
-    </div>
-
-    <div id="result"></div>
-  </div>
-
-  <script src="app.js"></script>
-</body>
-</html>
+    
