@@ -33,7 +33,9 @@ function updateDisplay() {
 }
 
 function findFrequencyByNumber(freqStr) {
-  return frequencies.find(f => f.freq === freqStr);
+  // Normalize both frequencies to 3 decimal places for comparison
+  const normalizedInput = parseFloat(freqStr).toFixed(3);
+  return frequencies.find(f => parseFloat(f.freq).toFixed(3) === normalizedInput);
 }
 
 function showMessage(message) {
@@ -248,7 +250,7 @@ function formatAtisIntoLines(text) {
   return lines;
 }
 
-function speakAtisLoop(airport, atis) {
+function speakAtisLoop(airport, atis, freqName) {
   stopAtisLoop();
 
   const atisLines = formatAtisIntoLines(atis.content);
@@ -293,7 +295,7 @@ function speakAtisLoop(airport, atis) {
     speechSynthesis.speak(utterance);
   }
 
-  showMessage(atis.name + " Connected");
+  showMessage((freqName || "ATIS") + " Connected");
   speakNextLine();
 }
 
@@ -422,6 +424,9 @@ swapBtn.addEventListener("click", async () => {
 
   const standbyEntry = findFrequencyByNumber(inputFreq);
 
+  console.log("Standby Entry:", standbyEntry);
+  console.log("Standby Entry Name:", standbyEntry?.name);
+
   // Stop ATIS FIRST (even if frequency not found)
   stopAtisLoop();
 
@@ -443,13 +448,16 @@ swapBtn.addEventListener("click", async () => {
   // Check if NEW active entry is ATIS (the one we just swapped in)
   if (isAtisEntry(standbyEntry)) {
     const airport = getAirportFromAtisName(standbyEntry.name);
+    console.log("Airport:", airport);
+    console.log("Frequency Name:", standbyEntry.name);
+    
     if (airport) {
       try {
         const allAtis = await fetchAllAtis();
         const atis = getAtisForAirport(allAtis, airport);
 
         if (atis) {
-          speakAtisLoop(airport, atis);
+          speakAtisLoop(airport, atis, standbyEntry.name);
         } else {
           showMessage(standbyEntry.name + " - ATIS not found");
         }
