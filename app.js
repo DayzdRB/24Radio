@@ -219,7 +219,7 @@ function formatAtisIntoLines(text) {
         const [t1, t2] = tempDewMatch[1].split('/');
         const t1Digits = digitsToAviation(t1);
         const t2Digits = digitsToAviation(t2);
-        lines.push("TEMPERATURE " + t1Digits + " DEW POINT " + t2Digits);
+        lines.push("TEMPERATURE " + t1Digits +"degrees celcius"+ " DEW POINT " + t2Digits);
       }
 
       if (qnhMatch) {
