@@ -198,7 +198,7 @@ function formatAtisIntoLines(text) {
         const spdDigits = digitsToAviation(spd);
         let windLine = "whinds AT " + dirDigits + " DEGREES AT " + spdDigits + " KNOTS";
         // wind pronunciation fix
-        windLine = windLine.replace(/^whinds/, "WhiND");
+        windLine = windLine.replace(/^WIND/, "WhiND");
         lines.push(windLine);
       }
 
