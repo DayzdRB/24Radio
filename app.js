@@ -313,7 +313,7 @@ function speakText(text) {
 const knob = document.getElementById("freq-knob");
 let isDragging = false;
 let startAngle = 0;
-let currentAngle = 0;
+let totalRotation = 0; // Track total rotation without limits
 let currentFreq = 122.800; // Start at UNICOM frequency
 
 // Set initial frequency in input
@@ -352,21 +352,20 @@ if (knob) {
     const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
     
     let deltaAngle = angle - startAngle;
+    
+    // Normalize delta to avoid jump when crossing -180/180 boundary
+    if (deltaAngle > Math.PI) deltaAngle -= 2 * Math.PI;
+    if (deltaAngle < -Math.PI) deltaAngle += 2 * Math.PI;
+    
     let deltaDegrees = deltaAngle * (180 / Math.PI);
-    
-    if (deltaDegrees > 180) deltaDegrees -= 360;
-    if (deltaDegrees < -180) deltaDegrees += 360;
+    totalRotation += deltaDegrees;
 
-    currentAngle += deltaDegrees;
-    
-    if (currentAngle > 180) currentAngle = 180;
-    if (currentAngle < -180) currentAngle = -180;
+    knob.style.transform = `rotate(${totalRotation}deg)`;
 
-    knob.style.transform = `rotate(${currentAngle}deg)`;
-
-    // Calculate frequency change based on angle (1 degree = 0.05 MHz)
+    // Calculate frequency change based on total rotation (10 degrees = 0.05 MHz)
     const freqIncrement = 0.05;
-    const steps = Math.round(currentAngle / 10); // 10 degrees per 0.05 increment
+    const degreesPerStep = 10;
+    const steps = Math.round(totalRotation / degreesPerStep);
     
     const newFreq = 122.800 + (steps * freqIncrement);
     
@@ -386,17 +385,14 @@ if (knob) {
     isDragging = false;
     
     // Snap to nearest 0.05 increment (10 degrees per step)
-    const freqStep = 10;
-    currentAngle = Math.round(currentAngle / freqStep) * freqStep;
+    const degreesPerStep = 10;
+    totalRotation = Math.round(totalRotation / degreesPerStep) * degreesPerStep;
     
-    if (currentAngle > 180) currentAngle = 180;
-    if (currentAngle < -180) currentAngle = -180;
+    knob.style.transform = `rotate(${totalRotation}deg)`;
     
-    knob.style.transform = `rotate(${currentAngle}deg)`;
-    
-    // Update frequency to match snapped angle
+    // Update frequency to match snapped rotation
     const freqIncrement = 0.05;
-    const steps = Math.round(currentAngle / freqStep);
+    const steps = Math.round(totalRotation / degreesPerStep);
     const newFreq = 122.800 + (steps * freqIncrement);
     currentFreq = Math.round(newFreq * 1000) / 1000;
     freqInput.value = currentFreq.toFixed(3);
