@@ -59,7 +59,6 @@
       font-family: "Courier New", monospace;
       cursor: pointer;
       min-width: 120px;
-      transform: translateY(2px);
     }
 
     #swap-btn:hover {
@@ -122,7 +121,7 @@
 
     .freq-row {
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: center;
       gap: 15px;
       margin-bottom: 15px;
@@ -131,12 +130,19 @@
     .freq-box-wrapper {
       display: flex;
       flex-direction: column;
+      justify-content: flex-end;
     }
 
     .freq-label {
       font-size: 12px;
       color: #0f0;
       margin-bottom: 5px;
+    }
+
+    .swap-box-wrapper {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
     }
   </style>
 </head>
@@ -153,7 +159,9 @@
         <div class="freq-label">COM1 STANDBY</div>
         <input type="text" id="standby-freq" placeholder="118.100" maxlength="7">
       </div>
-      <button id="swap-btn">SWAP</button>
+      <div class="swap-box-wrapper">
+        <button id="swap-btn">SWAP</button>
+      </div>
     </div>
 
     <div class="knob-container">
