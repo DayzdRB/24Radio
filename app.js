@@ -293,7 +293,7 @@ function speakAtisLoop(airport, atis) {
     speechSynthesis.speak(utterance);
   }
 
-  showMessage("ATIS fetched for " + airport + ". Speaking...");
+  showMessage(atis.name + " Connected");
   speakNextLine();
 }
 
@@ -449,8 +449,6 @@ swapBtn.addEventListener("click", async () => {
         const atis = getAtisForAirport(allAtis, airport);
 
         if (atis) {
-          // Show frequency name instead of airport
-          showMessage(standbyEntry.name + " Connected");
           speakAtisLoop(airport, atis);
         } else {
           showMessage(standbyEntry.name + " - ATIS not found");
