@@ -137,6 +137,14 @@
       margin-bottom: 5px;
       color: #0f0;
     }
+
+    .swap-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-left: 10px;
+    }
   </style>
 </head>
 <body>
@@ -149,11 +157,13 @@
         <div id="active-freq">---</div>
       </div>
 
-      <button id="swap-btn">SWAP</button>
-
       <div class="freq-column">
         <div class="freq-label">COM1 STANDBY</div>
         <input type="text" id="standby-freq" placeholder="118.100" maxlength="7">
+      </div>
+
+      <div class="swap-column">
+        <button id="swap-btn">SWAP</button>
       </div>
     </div>
 
