@@ -449,13 +449,15 @@ swapBtn.addEventListener("click", async () => {
         const atis = getAtisForAirport(allAtis, airport);
 
         if (atis) {
+          // Show frequency name instead of airport
+          showMessage(standbyEntry.name + " Connected");
           speakAtisLoop(airport, atis);
         } else {
-          showMessage("ATIS not found for " + airport);
+          showMessage(standbyEntry.name + " - ATIS not found");
         }
       } catch (err) {
         console.error("Error fetching ATIS after swap:", err);
-        showMessage("Failed to fetch ATIS for " + airport);
+        showMessage(standbyEntry.name + " - Failed to fetch ATIS");
       }
     }
   }
