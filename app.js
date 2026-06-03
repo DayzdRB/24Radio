@@ -7,6 +7,7 @@ let isAtisLooping = false;
 // ==== TTS VOICES & PRESETS ==== //
 let ttsVoices = [];
 let ttsPresets = [];
+let currentVoicePreset = null; // global preset used by default
 
 // Load voices and define presets
 function initVoices() {
@@ -17,35 +18,63 @@ function initVoices() {
     return;
   }
 
-  // Try to pick a stable, neutral voice.
-  // Adjust this name after you see your actual voice list in the console.
-  const preferred =
-    ttsVoices.find(v => v.name.includes("Google US English")) ||
-    ttsVoices[0];
-
-  // For now, use a single preset so behavior is consistent.
-  // Later you can expand this back to 2–3 presets for variety.
+  // Define several presets (you can adjust names after you see your voices)
   ttsPresets = [
     {
-      pickVoice: () => preferred,
+      // Preset 1: neutral / slightly lower
+      name: "Preset 1",
+      pickVoice: () =>
+        ttsVoices.find(v => v.name.toLowerCase().includes("male")) ||
+        ttsVoices[0],
       rate: 0.9,
-      pitch: 1.0
+      pitch: 0.95
+    },
+    {
+      // Preset 2: slightly higher / more "female-ish"
+      name: "Preset 2",
+      pickVoice: () =>
+        ttsVoices.find(v => v.name.toLowerCase().includes("female")) ||
+        ttsVoices[1] ||
+        ttsVoices[0],
+      rate: 0.95,
+      pitch: 1.05
+    },
+    {
+      // Preset 3: higher pitched, faster
+      name: "Preset 3",
+      pickVoice: () => ttsVoices[2] || ttsVoices[0],
+      rate: 1.05,
+      pitch: 1.15
     }
   ];
 
   console.log("TTS voices:", ttsVoices.map(v => v.name));
-  console.log("Using voice:", preferred && preferred.name);
+  console.log("TTS presets ready:", ttsPresets.map(p => p.name));
+
+  // On page load / first time voices are ready, pick a random preset
+  currentVoicePreset = getRandomTtsPreset(null);
+  console.log("Initial voice preset:", currentVoicePreset && currentVoicePreset.name);
 }
 
 window.speechSynthesis.onvoiceschanged = initVoices;
 initVoices();
 
-function getRandomTtsPreset() {
+// Pick a random preset, avoiding the same one twice in a row if possible
+function getRandomTtsPreset(previousPreset) {
   if (!ttsPresets || ttsPresets.length === 0 || ttsVoices.length === 0) {
     return null;
   }
-  const index = Math.floor(Math.random() * ttsPresets.length);
-  return ttsPresets[index];
+  if (ttsPresets.length === 1) {
+    return ttsPresets[0];
+  }
+
+  let candidate;
+  do {
+    const index = Math.floor(Math.random() * ttsPresets.length);
+    candidate = ttsPresets[index];
+  } while (previousPreset && candidate === previousPreset);
+
+  return candidate;
 }
 
 // =============================== //
@@ -168,8 +197,7 @@ function formatAtisIntoLines(text) {
         const dirDigits = digitsToAviation(dir);
         const spdDigits = digitsToAviation(spd);
         let windLine = "WIND AT " + dirDigits + " DEGREES AT " + spdDigits + " KNOTS";
-        // >>> WIND PRONUNCIATION FIX <<<
-        // Help TTS pronounce this as air "wind" by spelling it phonetically.
+        // wind pronunciation fix
         windLine = windLine.replace(/^WIND/, "WYND");
         lines.push(windLine);
       }
@@ -293,7 +321,19 @@ function speakAtisLoop(airport, atis, freqName) {
 
   let currentIndex = 0;
   isAtisLooping = true;
-  currentAtisLoop = { airport, atis, lines: atisLines, index: currentIndex, voicePreset: null };
+
+  // When starting a new ATIS loop (i.e., after a frequency swap),
+  // choose a new global preset, avoiding reusing the last one if possible.
+  currentVoicePreset = getRandomTtsPreset(currentVoicePreset);
+  console.log("New preset for this ATIS:", currentVoicePreset && currentVoicePreset.name);
+
+  currentAtisLoop = {
+    airport,
+    atis,
+    lines: atisLines,
+    index: currentIndex,
+    voicePreset: currentVoicePreset   // store which preset this loop is using
+  };
 
   function speakNextLine() {
     if (!isAtisLooping || currentAtisLoop?.airport !== airport) return;
@@ -302,11 +342,7 @@ function speakAtisLoop(airport, atis, freqName) {
 
     const utterance = new SpeechSynthesisUtterance(line);
 
-    // Pick a preset once per ATIS loop (even though right now there's only one)
-    if (!currentAtisLoop.voicePreset) {
-      currentAtisLoop.voicePreset = getRandomTtsPreset();
-    }
-    const preset = currentAtisLoop.voicePreset;
+    const preset = currentAtisLoop.voicePreset || currentVoicePreset;
 
     if (preset) {
       const voice = preset.pickVoice ? preset.pickVoice() : null;
