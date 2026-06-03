@@ -420,7 +420,6 @@ swapBtn.addEventListener("click", async () => {
     return;
   }
 
-  const activeEntry = findFrequencyByNumber(activeFreq);
   const standbyEntry = findFrequencyByNumber(inputFreq);
 
   if (!standbyEntry) {
@@ -440,9 +439,9 @@ swapBtn.addEventListener("click", async () => {
   const displayName = standbyEntry.name || "Unknown";
   showMessage("Swapped. Active: " + activeFreq + " - " + displayName);
 
-  // Check if new active is ATIS
-  if (isAtisEntry(activeEntry)) {
-    const airport = getAirportFromAtisName(activeEntry.name);
+  // Check if NEW active entry is ATIS (the one we just swapped in)
+  if (isAtisEntry(standbyEntry)) {
+    const airport = getAirportFromAtisName(standbyEntry.name);
     if (airport) {
       try {
         const allAtis = await fetchAllAtis();
