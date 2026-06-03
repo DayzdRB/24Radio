@@ -196,9 +196,9 @@ function formatAtisIntoLines(text) {
         const [dir, spd] = windMatch[1].split('/');
         const dirDigits = digitsToAviation(dir);
         const spdDigits = digitsToAviation(spd);
-        let windLine = "WIND AT " + dirDigits + " DEGREES AT " + spdDigits + " KNOTS";
+        let windLine = "whinds AT " + dirDigits + " DEGREES AT " + spdDigits + " KNOTS";
         // wind pronunciation fix
-        windLine = windLine.replace(/^WIND/, "WYND");
+        windLine = windLine.replace(/^whinds/, "WhiND");
         lines.push(windLine);
       }
 
@@ -230,7 +230,7 @@ function formatAtisIntoLines(text) {
       continue;
     }
 
-    line = line.replace(/\bRWY\b/g, "RUNWAY");
+    line = line.replace(/\bRWY\b/g, "runway");
     line = line.replace(/\bDEP\b/g, "DEPARTURE");
     line = line.replace(/\bARR\b/g, "ARRIVAL");
     line = line.replace(/\bAFCT\b/g, "AIRCRAFT");
