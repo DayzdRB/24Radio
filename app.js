@@ -17,40 +17,27 @@ function initVoices() {
     return;
   }
 
-  // Adjust these pickVoice functions once you see your actual voices in console
+  // Try to pick a stable, neutral voice.
+  // Adjust this name after you see your actual voice list in the console.
+  const preferred =
+    ttsVoices.find(v => v.name.includes("Google US English")) ||
+    ttsVoices[0];
+
+  // For now, use a single preset so behavior is consistent.
+  // Later you can expand this back to 2–3 presets for variety.
   ttsPresets = [
     {
-      // Preset 1: neutral / slightly lower
-      pickVoice: () =>
-        ttsVoices.find(v => v.name.toLowerCase().includes("male")) ||
-        ttsVoices[0],
+      pickVoice: () => preferred,
       rate: 0.9,
-      pitch: 0.95
-    },
-    {
-      // Preset 2: slightly higher / "female-ish"
-      pickVoice: () =>
-        ttsVoices.find(v => v.name.toLowerCase().includes("female")) ||
-        ttsVoices[1] ||
-        ttsVoices[0],
-      rate: 0.95,
-      pitch: 1.1
-    },
-    {
-      // Preset 3: higher pitched, faster
-      pickVoice: () => ttsVoices[2] || ttsVoices[0],
-      rate: 1.05,
-      pitch: 1.2
+      pitch: 1.0
     }
   ];
 
   console.log("TTS voices:", ttsVoices.map(v => v.name));
-  console.log("TTS presets ready:", ttsPresets.length);
+  console.log("Using voice:", preferred && preferred.name);
 }
 
-// Some browsers fire this when voices are ready
 window.speechSynthesis.onvoiceschanged = initVoices;
-// Also try once on load
 initVoices();
 
 function getRandomTtsPreset() {
@@ -271,7 +258,12 @@ function formatAtisIntoLines(text) {
       }
     }
 
-    line = line.replace(/\b(\d{2,4})\b/g, (match, num) => {
+    // Generic number replacement, but skip numbers that are directly after "RUNWAY "
+    line = line.replace(/\b(\d{2,4})\b/g, (match, num, offset, full) => {
+      const before = full.slice(0, offset);
+      if (/RUNWAY\s+$/.test(before)) {
+        return match; // already converted by runway-specific logic
+      }
       return digitsToAviation(num);
     });
 
@@ -295,7 +287,6 @@ function speakAtisLoop(airport, atis, freqName) {
 
   let currentIndex = 0;
   isAtisLooping = true;
-  // voicePreset will be filled the first time we speak a line
   currentAtisLoop = { airport, atis, lines: atisLines, index: currentIndex, voicePreset: null };
 
   function speakNextLine() {
@@ -305,7 +296,7 @@ function speakAtisLoop(airport, atis, freqName) {
 
     const utterance = new SpeechSynthesisUtterance(line);
 
-    // Pick a preset once per ATIS loop
+    // Pick a preset once per ATIS loop (even though right now there's only one)
     if (!currentAtisLoop.voicePreset) {
       currentAtisLoop.voicePreset = getRandomTtsPreset();
     }
@@ -315,11 +306,12 @@ function speakAtisLoop(airport, atis, freqName) {
       const voice = preset.pickVoice ? preset.pickVoice() : null;
       if (voice) {
         utterance.voice = voice;
+        // Good practice: set lang to match the voice
+        utterance.lang = voice.lang;
       }
       utterance.rate = preset.rate;
       utterance.pitch = preset.pitch;
     } else {
-      // Fallback if no presets/voices yet
       utterance.rate = 0.85;
       utterance.pitch = 1.0;
     }
