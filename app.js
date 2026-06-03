@@ -72,11 +72,16 @@ function stopAtisLoop() {
 
 // Convert digits to aviation pronunciation (9 -> Niner, not Nine)
 function digitsToAviation(numStr) {
-  const digits = numStr.split("");
-  return digits.map(d => {
-    if (d === "9") return "NINER";
-    return d.split("").join(" ");
-  }).join(" ");
+  let result = "";
+  for (let i = 0; i < numStr.length; i++) {
+    const d = numStr[i];
+    if (d === "9") {
+      result += "NINER ";
+    } else {
+      result += d + " ";
+    }
+  }
+  return result.trim();
 }
 
 function formatAtisIntoLines(text) {
@@ -121,13 +126,15 @@ function formatAtisIntoLines(text) {
       }
 
       if (visMatch) {
-        lines.push("VISIBILITY NINE NINE NINE NINE");
+        // Use digitsToAviation for visibility (9999 -> NINER NINER NINER NINER)
+        const visDigits = digitsToAviation("9999");
+        lines.push("VISIBILITY " + visDigits);
       }
 
       if (cloudsMatch) {
         const cloudType = cloudsMatch[1].match(/(BKN|SCT|OVC|FEW)/)[0];
         const cloudHeight = cloudsMatch[2];
-        const heightDigits = cloudHeight.split("").join(" ");
+        const heightDigits = digitsToAviation(cloudHeight);
         const cloudNames = { "BKN": "BROKEN", "SCT": "SCATTERED", "OVC": "OVERCAST", "FEW": "FEW" };
         lines.push(cloudNames[cloudType] + " CLOUDS AT " + heightDigits);
       }
@@ -140,7 +147,7 @@ function formatAtisIntoLines(text) {
       }
 
       if (qnhMatch) {
-        const qnhDigits = qnhMatch[1].substring(1).split("").join(" ");
+        const qnhDigits = digitsToAviation(qnhMatch[1].substring(1));
         lines.push("QNH " + qnhDigits);
       }
 
