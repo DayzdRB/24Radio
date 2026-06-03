@@ -33,7 +33,6 @@ function updateDisplay() {
 }
 
 function findFrequencyByNumber(freqStr) {
-  // Normalize both frequencies to 3 decimal places for comparison
   const normalizedInput = parseFloat(freqStr).toFixed(3);
   return frequencies.find(f => parseFloat(f.freq).toFixed(3) === normalizedInput);
 }
@@ -70,18 +69,28 @@ function stopAtisLoop() {
   currentAtisLoop = null;
 }
 
-// Convert digits to aviation pronunciation (9 -> Niner, not Nine)
+// Convert digits to aviation pronunciation (9 -> Niner, 3 -> Tree, 5 -> Fife)
 function digitsToAviation(numStr) {
+  const phoneticDigits = {
+    "0": "ZE-RO",
+    "1": "WUN",
+    "2": "TOO",
+    "3": "TREE",
+    "4": "FOWER",
+    "5": "FIFE",
+    "6": "SIX",
+    "7": "SEVEN",
+    "8": "AIT",
+    "9": "NINER"
+  };
+  
   let result = "";
   for (let i = 0; i < numStr.length; i++) {
     const d = numStr[i];
-    if (d === "9") {
-      result += "NINER ";
-    } else {
-      result += d + " ";
-    }
+    result += phoneticDigits[d] || d;
+    if (i < numStr.length - 1) result += " ";
   }
-  return result.trim();
+  return result;
 }
 
 function formatAtisIntoLines(text) {
@@ -104,20 +113,17 @@ function formatAtisIntoLines(text) {
     let line = rawLine.toUpperCase().trim();
     if (!line) continue;
 
-    // Check if this is a weather line (has raw weather data like 316/05 9999 FEW021 04/09 Q1012)
     const isWeatherLine = line.match(/\d{3}\/\d{2}/) || line.match(/\b9999\b/) || 
                           line.match(/(?:BKN|SCT|OVC|FEW)\d{2,3}/) || 
                           line.match(/\b\d{2}\/\d{2}\b/) || line.match(/\bQ\d{4}\b/);
 
     if (isWeatherLine) {
-      // Extract raw weather components FIRST, before any text replacements
       const windMatch = line.match(/(\d{3}\/\d{2})/);
-      const visMatch = line.match(/\b(9999)\b/);
+      const visMatch = line.match(/\b(\d{4})\b/);
       const cloudsMatch = line.match(/((?:BKN|SCT|OVC|FEW)(\d{2,3}))/);
       const tempDewMatch = line.match(/\b(\d{2}\/\d{2})\b/);
       const qnhMatch = line.match(/\b(Q\d{4})\b/);
 
-      // Process each weather component separately into its own line
       if (windMatch) {
         const [dir, spd] = windMatch[1].split('/');
         const dirDigits = digitsToAviation(dir);
@@ -126,8 +132,7 @@ function formatAtisIntoLines(text) {
       }
 
       if (visMatch) {
-        // Use digitsToAviation for visibility (9999 -> NINER NINER NINER NINER)
-        const visDigits = digitsToAviation("9999");
+        const visDigits = digitsToAviation(visMatch[1]);
         lines.push("VISIBILITY " + visDigits);
       }
 
@@ -154,40 +159,24 @@ function formatAtisIntoLines(text) {
       continue;
     }
 
-    // 1. Expand common abbreviations
     line = line.replace(/\bRWY\b/g, "RUNWAY");
     line = line.replace(/\bDEP\b/g, "DEPARTURE");
     line = line.replace(/\bARR\b/g, "ARRIVAL");
     line = line.replace(/\bAFCT\b/g, "AIRCRAFT");
 
-    // 2. Break up ARRIVAL RUNWAY from DEPARTURE RUNWAY on separate lines FIRST (before runway letter replacement)
     if (line.includes("DEPARTURE RUNWAY") && line.includes("ARRIVAL RUNWAY")) {
-      // Split by " ARRIVAL RUNWAY " (with spaces) to get two separate parts
       const splitIndex = line.indexOf(" ARRIVAL RUNWAY ");
       if (splitIndex !== -1) {
         let depLine = line.substring(0, splitIndex).trim();
         let arrLine = line.substring(splitIndex + 1).trim();
 
-        // Apply runway letter replacement with aviation digits (25L -> TWO FIVE LEFT)
-        depLine = depLine.replace(/(\d{1,3})(L)/g, (m, num, letter) => {
-          return digitsToAviation(num) + " LEFT";
-        });
-        depLine = depLine.replace(/(\d{1,3})(R)/g, (m, num, letter) => {
-          return digitsToAviation(num) + " RIGHT";
-        });
-        depLine = depLine.replace(/(\d{1,3})(C)/g, (m, num, letter) => {
-          return digitsToAviation(num) + " CENTER";
-        });
+        depLine = depLine.replace(/(\d{1,3})(L)/g, (m, num) => digitsToAviation(num) + " LEFT");
+        depLine = depLine.replace(/(\d{1,3})(R)/g, (m, num) => digitsToAviation(num) + " RIGHT");
+        depLine = depLine.replace(/(\d{1,3})(C)/g, (m, num) => digitsToAviation(num) + " CENTER");
 
-        arrLine = arrLine.replace(/(\d{1,3})(L)/g, (m, num, letter) => {
-          return digitsToAviation(num) + " LEFT";
-        });
-        arrLine = arrLine.replace(/(\d{1,3})(R)/g, (m, num, letter) => {
-          return digitsToAviation(num) + " RIGHT";
-        });
-        arrLine = arrLine.replace(/(\d{1,3})(C)/g, (m, num, letter) => {
-          return digitsToAviation(num) + " CENTER";
-        });
+        arrLine = arrLine.replace(/(\d{1,3})(L)/g, (m, num) => digitsToAviation(num) + " LEFT");
+        arrLine = arrLine.replace(/(\d{1,3})(R)/g, (m, num) => digitsToAviation(num) + " RIGHT");
+        arrLine = arrLine.replace(/(\d{1,3})(C)/g, (m, num) => digitsToAviation(num) + " CENTER");
 
         lines.push(depLine);
         lines.push(arrLine);
@@ -195,40 +184,32 @@ function formatAtisIntoLines(text) {
       }
     }
 
-    // 3. Runway designators: 25R -> TWO FIVE RIGHT (for single runway lines)
     line = line.replace(/(\d{1,3})R/g, (m, num) => digitsToAviation(num) + " RIGHT");
     line = line.replace(/(\d{1,3})L/g, (m, num) => digitsToAviation(num) + " LEFT");
     line = line.replace(/(\d{1,3})C/g, (m, num) => digitsToAviation(num) + " CENTER");
 
-    // 4. Time: 1821Z -> ONE EIGHT TWO ONE ZULU
-    line = line.replace(/\b(\d{4})Z\b/g, "$1 ZULU");
+    line = line.replace(/\b(\d{4})Z\b/g, (m, num) => digitsToAviation(num) + " ZULU");
     line = line.replace(/\bZ\b/g, " ZULU ");
 
-    // 5. Altimeter: Q1012 -> QNH 1012 (keep digits for later processing)
     line = line.replace(/\bQ(\d{4})\b/g, "QNH $1");
 
-    // 6. Cloud layers (for non-weather lines)
     line = line.replace(/\bBKN(\d{2,3})\b/g, "BROKEN CLOUDS AT $1");
     line = line.replace(/\bSCT(\d{2,3})\b/g, "SCATTERED CLOUDS AT $1");
     line = line.replace(/\bOVC(\d{2,3})\b/g, "OVERCAST CLOUDS AT $1");
     line = line.replace(/\bFEW(\d{2,3})\b/g, "FEW CLOUDS AT $1");
 
-    // 7. Transition level
     line = line.replace(/\bLEVEL\s+(\d{2,3})\b/g, "LEVEL $1");
 
-    // 8. Replace "INFO X" or "INFORMATION X" with phonetic letter
     line = line.replace(/\bINFO(?:RMATION)?\s+([A-Z])\b/g, (match, letter) => {
       const phoneticLetter = phonetic[letter] || letter;
       return "INFO " + phoneticLetter;
     });
 
-    // 9. Replace "INFORMATION X" explicitly
     line = line.replace(/INFORMATION\s+([A-Z])\b/g, (match, letter) => {
       const phoneticLetter = phonetic[letter] || letter;
       return "INFORMATION " + phoneticLetter;
     });
 
-    // 10. Split ATIS INFO line into separate parts: "ISAU ATIS INFO V" and "TIME 1821Z"
     if (line.match(/ATIS INFO [A-Z]+ TIME/)) {
       const atisInfoMatch = line.match(/^[^\s]+ ATIS INFO [A-Z]+/);
       const timeMatch = line.match(/TIME [^\s]+/);
@@ -240,15 +221,11 @@ function formatAtisIntoLines(text) {
       }
     }
 
-    // 11. General numbers (for altimeter digits, cloud height, etc.) - use aviation pronunciation
     line = line.replace(/\b(\d{2,4})\b/g, (match, num) => {
       return digitsToAviation(num);
     });
 
-    // 12. Replace remaining / with SLASH (fallback)
     line = line.replace(/\//g, " SLASH ");
-
-    // 13. Force ATIS to be pronounced as one word: "Atis"
     line = line.replace(/\bATIS\b/g, "Atis");
 
     lines.push(line);
@@ -318,28 +295,22 @@ function speakText(text) {
   speechSynthesis.speak(utterance);
 }
 
-// Knob functionality - starts at 122.800, increments by 0.05
 const knob = document.getElementById("freq-knob");
 let isDragging = false;
 let startAngle = 0;
-let totalRotation = 0; // Track total rotation without limits
-let currentFreq = 122.800; // Start at UNICOM frequency
+let totalRotation = 0;
+let currentFreq = 122.800;
 
-// Set initial frequency in input
 freqInput.value = currentFreq.toFixed(3);
 
-// Update knob position when user types in the input
 freqInput.addEventListener("input", (e) => {
   const typedFreq = parseFloat(e.target.value);
   if (!isNaN(typedFreq)) {
     currentFreq = typedFreq;
-    
-    // Calculate knob rotation based on frequency (122.800 = 0 degrees, 0.05 = 10 degrees)
     const freqIncrement = 0.05;
     const degreesPerStep = 10;
     const steps = Math.round((typedFreq - 122.800) / freqIncrement);
     totalRotation = steps * degreesPerStep;
-    
     knob.style.transform = `rotate(${totalRotation}deg)`;
   }
 });
@@ -349,7 +320,6 @@ if (knob) {
   document.addEventListener("mousemove", drag);
   document.addEventListener("mouseup", endDrag);
 
-  // Touch support for mobile
   knob.addEventListener("touchstart", (e) => {
     startDrag(e.touches[0]);
     e.preventDefault();
@@ -377,8 +347,6 @@ if (knob) {
     const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
     
     let deltaAngle = angle - startAngle;
-    
-    // Normalize delta to avoid jump when crossing -180/180 boundary
     if (deltaAngle > Math.PI) deltaAngle -= 2 * Math.PI;
     if (deltaAngle < -Math.PI) deltaAngle += 2 * Math.PI;
     
@@ -387,14 +355,11 @@ if (knob) {
 
     knob.style.transform = `rotate(${totalRotation}deg)`;
 
-    // Calculate frequency change based on total rotation (10 degrees = 0.05 MHz)
     const freqIncrement = 0.05;
     const degreesPerStep = 10;
     const steps = Math.round(totalRotation / degreesPerStep);
     
     const newFreq = 122.800 + (steps * freqIncrement);
-    
-    // Round to 3 decimal places
     const roundedFreq = Math.round(newFreq * 1000) / 1000;
     
     if (roundedFreq !== currentFreq) {
@@ -408,14 +373,10 @@ if (knob) {
 
   function endDrag() {
     isDragging = false;
-    
-    // Snap to nearest 0.05 increment (10 degrees per step)
     const degreesPerStep = 10;
     totalRotation = Math.round(totalRotation / degreesPerStep) * degreesPerStep;
-    
     knob.style.transform = `rotate(${totalRotation}deg)`;
     
-    // Update frequency to match snapped rotation
     const freqIncrement = 0.05;
     const steps = Math.round(totalRotation / degreesPerStep);
     const newFreq = 122.800 + (steps * freqIncrement);
@@ -424,19 +385,16 @@ if (knob) {
   }
 }
 
-// Stop ATIS loop when page is unloaded/refreshed
 window.addEventListener("beforeunload", () => {
   stopAtisLoop();
 });
 
-// Stop on page hide (when switching tabs)
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     stopAtisLoop();
   }
 });
 
-// SWAP button functionality - now swaps active with standby input
 swapBtn.addEventListener("click", async () => {
   const inputFreq = freqInput.value.trim();
   
@@ -450,10 +408,8 @@ swapBtn.addEventListener("click", async () => {
   console.log("Standby Entry:", standbyEntry);
   console.log("Standby Entry Name:", standbyEntry?.name);
 
-  // Stop ATIS FIRST (even if frequency not found)
   stopAtisLoop();
 
-  // Swap frequencies regardless of whether it exists in JSON
   const temp = activeFreq;
   activeFreq = inputFreq;
   standbyFreq = temp;
@@ -468,7 +424,6 @@ swapBtn.addEventListener("click", async () => {
   const displayName = standbyEntry.name || "Unknown";
   showMessage("Swapped. Active: " + activeFreq + " - " + displayName);
 
-  // Check if NEW active entry is ATIS (the one we just swapped in)
   if (isAtisEntry(standbyEntry)) {
     const airport = getAirportFromAtisName(standbyEntry.name);
     console.log("Airport:", airport);
@@ -490,7 +445,6 @@ swapBtn.addEventListener("click", async () => {
       }
     }
   }
-  // If new active is NOT ATIS, ATIS stays stopped (correct behavior)
 });
 
 updateDisplay();
