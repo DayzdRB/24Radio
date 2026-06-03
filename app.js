@@ -150,9 +150,9 @@ function digitsToAviation(numStr) {
   for (let i = 0; i < numStr.length; i++) {
     const d = numStr[i];
     if (d === "9") {
-      result += "NINER";
+      result += "niner";
     } else if (d === "0") {
-      result += "ZERO";
+      result += "zero";
     } else {
       result += d;
     }
