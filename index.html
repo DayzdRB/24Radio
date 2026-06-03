@@ -33,13 +33,21 @@
       min-width: 120px;
     }
 
-    #freq-input {
+    #standby-freq {
       background: #000;
       color: #0f0;
       border: 2px solid #0f0;
-      padding: 6px;
-      font-size: 16px;
+      padding: 8px 16px;
+      font-size: 20px;
+      font-family: "Courier New", monospace;
+      min-width: 120px;
       text-align: center;
+      outline: none;
+    }
+
+    #standby-freq:focus {
+      border-color: #0ff;
+      box-shadow: 0 0 10px #0ff;
     }
 
     button {
@@ -110,13 +118,24 @@
       text-shadow: 0 0 5px #0f0;
     }
 
-    #controls {
+    .freq-row {
       display: flex;
-      gap: 10px;
-      justify-content: center;
       align-items: center;
-      margin-top: 15px;
-      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .freq-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .freq-label {
+      font-size: 12px;
+      margin-bottom: 5px;
+      color: #0f0;
     }
   </style>
 </head>
@@ -124,27 +143,26 @@
   <h1>24Radio</h1>
 
   <div id="radio-panel">
-    <div id="active-display">
-      <div>COM1 ACTIVE</div>
-      <div id="active-freq">---</div>
+    <div class="freq-row">
+      <div class="freq-column">
+        <div class="freq-label">COM1 ACTIVE</div>
+        <div id="active-freq">---</div>
+      </div>
+
+      <button id="swap-btn">SWAP</button>
+
+      <div class="freq-column">
+        <div class="freq-label">COM1 STANDBY</div>
+        <input type="text" id="standby-freq" placeholder="118.100" maxlength="7">
+      </div>
     </div>
 
-    <div id="standby-display">
-      <div>COM1 STANDBY</div>
-      <div id="standby-freq">---</div>
-    </div>
-
-    <!-- Knob instead of Tune button -->
+    <!-- Knob below frequencies -->
     <div class="knob-container">
       <div class="knob" id="freq-knob">
         <div class="knob-marker"></div>
       </div>
       <div class="knob-label">TUNE</div>
-    </div>
-
-    <div id="controls">
-      <input type="text" id="freq-input" placeholder="118.100">
-      <button id="swap-btn">SWAP</button>
     </div>
 
     <div id="result"></div>
