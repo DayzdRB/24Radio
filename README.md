@@ -21,3 +21,17 @@ Add remaining ATIS freqeuncies:
 endgame:
 mimic the G1000 or G430W
 }
+
+6/2/2026
+{
+I added a knob
+Added better phonetics
+I update HUD
+I shared website with a few people and the reviews were decent
+
+next steps:
+add a list of useable frequencies and dots showing grey, red, orange, or green dependign on how many controllers are online at an airport / island
+Add a map
+add working comms tuning with discord
+Update the looks and maybe
+}
