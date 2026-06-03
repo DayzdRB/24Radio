@@ -1,21 +1,20 @@
 <!DOCTYPE html>
-<html lang = "en">
+<html lang="en">
 <head>
-  <meta charset = "UTF-8">
-  <meta name = "viewport" content="width=device-width, initial-scale = 1.0">
-  <link rel ="icon"type="image/png" href="Favicon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="Favicon.png">
   <title>24Radio - ATC24 Radio Client</title>
 
   <style>
-    body{
+    body {
       background: #111;
       color: #0f0;
       font-family: Arial, sans-serif;
       text-align: center;
-    
     }
 
-    #radio-panel{
+    #radio-panel {
       background: #222;
       border: 3px solid #0f0;
       border-radius: 8px;
@@ -24,42 +23,100 @@
       margin-top: 20px;
     }
 
-    #active-freq, #standby-freq{
-    font-size: 20px;
-    font-family: "Courier New", monospace;
-    background: #000;
-    border: 2px solid #0f0;
-    padding: 8px 16px;
-    display: incline-block;
-    min0width: 120px;
+    #active-freq, #standby-freq {
+      font-size: 20px;
+      font-family: "Courier New", monospace;
+      background: #000;
+      border: 2px solid #0f0;
+      padding: 8px 16px;
+      display: inline-block;
+      min-width: 120px;
     }
 
-    #freq-input{
-    background: #000;
-    color: #0f0;
-    border: 2px solid #0f0;
-    padding: 6px;
-    font-size: 16px;
-    text-align: center;
+    #freq-input {
+      background: #000;
+      color: #0f0;
+      border: 2px solid #0f0;
+      padding: 6px;
+      font-size: 16px;
+      text-align: center;
     }
 
-    button{
-    background: #000;
-    color: #0f0;
-    border: 2px solid #0f0;
-    padding: 6px 12px;
-    font-size: 16px;
-    cursor: pointer;
+    button {
+      background: #000;
+      color: #0f0;
+      border: 2px solid #0f0;
+      padding: 6px 12px;
+      font-size: 16px;
+      cursor: pointer;
     }
 
-    button:hover{
-    background: #003300;
+    button:hover {
+      background: #003300;
     }
 
-    #result{
-    margin-top: 10px;
-    font-size: 14px;
-    color: 8f8;
+    #result {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #8f8;
+    }
+
+    /* Knob styles */
+    .knob-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 15px;
+      user-select: none;
+    }
+
+    .knob {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+      border: 3px solid #0f0;
+      box-shadow: 
+        5px 5px 10px #0d0d0d,
+        -5px -5px 10px #333;
+      position: relative;
+      cursor: grab;
+      transition: transform 0.1s ease;
+    }
+
+    .knob:active {
+      cursor: grabbing;
+    }
+
+    .knob-marker {
+      width: 8px;
+      height: 20px;
+      background: #0f0;
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 2px;
+      box-shadow: 0 0 10px #0f0;
+    }
+
+    .knob-label {
+      margin-top: 12px;
+      color: #0f0;
+      font-family: "Courier New", monospace;
+      font-size: 14px;
+      font-weight: bold;
+      text-shadow: 0 0 5px #0f0;
+    }
+
+    #controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      margin-top: 15px;
+      flex-wrap: wrap;
     }
   </style>
 </head>
@@ -70,22 +127,29 @@
     <div id="active-display">
       <div>COM1 ACTIVE</div>
       <div id="active-freq">---</div>
+    </div>
+
+    <div id="standby-display">
+      <div>COM1 STANDBY</div>
+      <div id="standby-freq">---</div>
+    </div>
+
+    <!-- Knob instead of Tune button -->
+    <div class="knob-container">
+      <div class="knob" id="freq-knob">
+        <div class="knob-marker"></div>
+      </div>
+      <div class="knob-label">TUNE</div>
+    </div>
+
+    <div id="controls">
+      <input type="text" id="freq-input" placeholder="118.100">
+      <button id="swap-btn">SWAP</button>
+    </div>
+
+    <div id="result"></div>
   </div>
 
-  <div id="standby-display">
-    <div>COM1 STANDBY</div>
-    <div id="standby-freq"></div>
-  </div>
-
-  <div id="controls">
-    <input type="text" id="freq-input" placeholder = "118.100">
-    <button id="tune-btn">Tune</button>
-    <button id="swap-btn">SWAP</button>
-  </div>
-
-  <div id="result"></div>
-  </div>
-
-  <script src= "app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
