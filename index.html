@@ -50,16 +50,20 @@
       box-shadow: 0 0 10px #0ff;
     }
 
-    button {
+    #swap-btn {
       background: #000;
       color: #0f0;
       border: 2px solid #0f0;
-      padding: 6px 12px;
-      font-size: 16px;
+      padding: 8px 16px;
+      font-size: 20px;
+      font-family: "Courier New", monospace;
       cursor: pointer;
+      min-width: 120px;
+      height: 46px;
+      line-height: 46px;
     }
 
-    button:hover {
+    #swap-btn:hover {
       background: #003300;
     }
 
@@ -120,7 +124,7 @@
 
     .freq-row {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       gap: 15px;
       margin-bottom: 15px;
@@ -142,8 +146,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      margin-left: 10px;
+      justify-content: flex-start;
     }
   </style>
 </head>
