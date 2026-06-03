@@ -69,25 +69,16 @@ function stopAtisLoop() {
   currentAtisLoop = null;
 }
 
-// Convert digits to aviation pronunciation (9 -> Niner, 3 -> Tree, 5 -> Fife)
+// Convert digits to aviation pronunciation (9 -> Niner only)
 function digitsToAviation(numStr) {
-  const phoneticDigits = {
-    "0": "ZE-RO",
-    "1": "WUN",
-    "2": "TOO",
-    "3": "TREE",
-    "4": "FOWER",
-    "5": "FIFE",
-    "6": "SIX",
-    "7": "SEVEN",
-    "8": "AIT",
-    "9": "NINER"
-  };
-  
   let result = "";
   for (let i = 0; i < numStr.length; i++) {
     const d = numStr[i];
-    result += phoneticDigits[d] || d;
+    if (d === "9") {
+      result += "NINER";
+    } else {
+      result += d;
+    }
     if (i < numStr.length - 1) result += " ";
   }
   return result;
