@@ -309,12 +309,15 @@ function speakText(text) {
   speechSynthesis.speak(utterance);
 }
 
-// Knob functionality
+// Knob functionality - starts at 122.800, increments by 0.05
 const knob = document.getElementById("freq-knob");
 let isDragging = false;
 let startAngle = 0;
 let currentAngle = 0;
-let currentFreqIndex = 0;
+let currentFreq = 122.800; // Start at UNICOM frequency
+
+// Set initial frequency in input
+freqInput.value = currentFreq.toFixed(3);
 
 if (knob) {
   knob.addEventListener("mousedown", startDrag);
@@ -361,22 +364,19 @@ if (knob) {
 
     knob.style.transform = `rotate(${currentAngle}deg)`;
 
-    // Calculate frequency index based on angle (10 degrees per frequency)
-    const freqStep = 10;
-    const newIndex = Math.round(currentAngle / freqStep);
+    // Calculate frequency change based on angle (1 degree = 0.05 MHz)
+    const freqIncrement = 0.05;
+    const steps = Math.round(currentAngle / 10); // 10 degrees per 0.05 increment
     
-    if (newIndex !== currentFreqIndex && frequencies.length > 0) {
-      currentFreqIndex = newIndex;
-      
-      // Wrap around
-      if (currentFreqIndex < 0) currentFreqIndex = frequencies.length - 1;
-      if (currentFreqIndex >= frequencies.length) currentFreqIndex = 0;
-      
-      const selectedFreq = frequencies[currentFreqIndex];
-      if (selectedFreq) {
-        freqInput.value = selectedFreq.freq;
-        showMessage("Selected: " + selectedFreq.name + " - " + selectedFreq.freq);
-      }
+    const newFreq = 122.800 + (steps * freqIncrement);
+    
+    // Round to 3 decimal places
+    const roundedFreq = Math.round(newFreq * 1000) / 1000;
+    
+    if (roundedFreq !== currentFreq) {
+      currentFreq = roundedFreq;
+      freqInput.value = currentFreq.toFixed(3);
+      showMessage("Frequency: " + currentFreq.toFixed(3));
     }
 
     startAngle = angle;
@@ -385,7 +385,7 @@ if (knob) {
   function endDrag() {
     isDragging = false;
     
-    // Snap to nearest frequency (10 degrees per step)
+    // Snap to nearest 0.05 increment (10 degrees per step)
     const freqStep = 10;
     currentAngle = Math.round(currentAngle / freqStep) * freqStep;
     
@@ -393,6 +393,13 @@ if (knob) {
     if (currentAngle < -180) currentAngle = -180;
     
     knob.style.transform = `rotate(${currentAngle}deg)`;
+    
+    // Update frequency to match snapped angle
+    const freqIncrement = 0.05;
+    const steps = Math.round(currentAngle / freqStep);
+    const newFreq = 122.800 + (steps * freqIncrement);
+    currentFreq = Math.round(newFreq * 1000) / 1000;
+    freqInput.value = currentFreq.toFixed(3);
   }
 }
 
