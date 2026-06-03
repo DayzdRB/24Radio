@@ -4,6 +4,65 @@ let standbyFreq = null;
 let currentAtisLoop = null;
 let isAtisLooping = false;
 
+// ==== TTS VOICES & PRESETS ==== //
+let ttsVoices = [];
+let ttsPresets = [];
+
+// Load voices and define presets
+function initVoices() {
+  ttsVoices = window.speechSynthesis.getVoices();
+
+  if (!ttsVoices || ttsVoices.length === 0) {
+    console.log("No TTS voices loaded yet.");
+    return;
+  }
+
+  // Adjust these pickVoice functions once you see your actual voices in console
+  ttsPresets = [
+    {
+      // Preset 1: neutral / slightly lower
+      pickVoice: () =>
+        ttsVoices.find(v => v.name.toLowerCase().includes("male")) ||
+        ttsVoices[0],
+      rate: 0.9,
+      pitch: 0.95
+    },
+    {
+      // Preset 2: slightly higher / "female-ish"
+      pickVoice: () =>
+        ttsVoices.find(v => v.name.toLowerCase().includes("female")) ||
+        ttsVoices[1] ||
+        ttsVoices[0],
+      rate: 0.95,
+      pitch: 1.1
+    },
+    {
+      // Preset 3: higher pitched, faster
+      pickVoice: () => ttsVoices[2] || ttsVoices[0],
+      rate: 1.05,
+      pitch: 1.2
+    }
+  ];
+
+  console.log("TTS voices:", ttsVoices.map(v => v.name));
+  console.log("TTS presets ready:", ttsPresets.length);
+}
+
+// Some browsers fire this when voices are ready
+window.speechSynthesis.onvoiceschanged = initVoices;
+// Also try once on load
+initVoices();
+
+function getRandomTtsPreset() {
+  if (!ttsPresets || ttsPresets.length === 0 || ttsVoices.length === 0) {
+    return null;
+  }
+  const index = Math.floor(Math.random() * ttsPresets.length);
+  return ttsPresets[index];
+}
+
+// =============================== //
+
 async function loadfrequencies() {
   try {
     const response = await fetch("freq.json");
@@ -236,7 +295,8 @@ function speakAtisLoop(airport, atis, freqName) {
 
   let currentIndex = 0;
   isAtisLooping = true;
-  currentAtisLoop = { airport, atis, lines: atisLines, index: currentIndex };
+  // voicePreset will be filled the first time we speak a line
+  currentAtisLoop = { airport, atis, lines: atisLines, index: currentIndex, voicePreset: null };
 
   function speakNextLine() {
     if (!isAtisLooping || currentAtisLoop?.airport !== airport) return;
@@ -244,8 +304,26 @@ function speakAtisLoop(airport, atis, freqName) {
     const line = atisLines[currentIndex];
 
     const utterance = new SpeechSynthesisUtterance(line);
-    utterance.rate = 0.85;
-    utterance.pitch = 1.0;
+
+    // Pick a preset once per ATIS loop
+    if (!currentAtisLoop.voicePreset) {
+      currentAtisLoop.voicePreset = getRandomTtsPreset();
+    }
+    const preset = currentAtisLoop.voicePreset;
+
+    if (preset) {
+      const voice = preset.pickVoice ? preset.pickVoice() : null;
+      if (voice) {
+        utterance.voice = voice;
+      }
+      utterance.rate = preset.rate;
+      utterance.pitch = preset.pitch;
+    } else {
+      // Fallback if no presets/voices yet
+      utterance.rate = 0.85;
+      utterance.pitch = 1.0;
+    }
+
     utterance.volume = 1.0;
 
     utterance.onend = function () {
@@ -398,22 +476,6 @@ swapBtn.addEventListener("click", async () => {
 
   console.log("Standby Entry:", standbyEntry);
   console.log("Standby Entry Name:", standbyEntry?.name);
-
-  // Debug: Log the ATIS content
-  if (isAtisEntry(standbyEntry)) {
-    const airport = getAirportFromAtisName(standbyEntry.name);
-    if (airport) {
-      try {
-        const allAtis = await fetchAllAtis();
-        const atis = getAtisForAirport(allAtis, airport);
-        if (atis) {
-          console.log("ATIS Content for " + airport + ":", atis.content);
-        }
-      } catch (err) {
-        console.error("Error fetching ATIS:", err);
-      }
-    }
-  }
 
   stopAtisLoop();
 
