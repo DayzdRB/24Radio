@@ -23,14 +23,13 @@ loadfrequencies();
 
 const activeFreqEl = document.getElementById("active-freq");
 const standbyFreqEl = document.getElementById("standby-freq");
-const freqInput = document.getElementById("freq-input");
-const tuneBtn = document.getElementById("tune-btn");
+const freqInput = document.getElementById("standby-freq");
 const swapBtn = document.getElementById("swap-btn");
 const resultEl = document.getElementById("result");
 
 function updateDisplay() {
   activeFreqEl.textContent = activeFreq || "---";
-  standbyFreqEl.textContent = standbyFreq || "---";
+  standbyFreqEl.value = standbyFreq || "---";
 }
 
 function findFrequencyByNumber(freqStr) {
@@ -310,68 +309,136 @@ function speakText(text) {
   speechSynthesis.speak(utterance);
 }
 
-tuneBtn.addEventListener("click", async () => {
-  const input = freqInput.value.trim();
-  const entry = findFrequencyByNumber(input);
+// Knob functionality
+const knob = document.getElementById("freq-knob");
+let isDragging = false;
+let startAngle = 0;
+let currentAngle = 0;
+let currentFreqIndex = 0;
 
-  if (!entry) {
-    showMessage("Frequency not found: " + input);
-    return;
+if (knob) {
+  knob.addEventListener("mousedown", startDrag);
+  document.addEventListener("mousemove", drag);
+  document.addEventListener("mouseup", endDrag);
+
+  // Touch support for mobile
+  knob.addEventListener("touchstart", (e) => {
+    startDrag(e.touches[0]);
+    e.preventDefault();
+  });
+  document.addEventListener("touchmove", (e) => {
+    drag(e.touches[0]);
+    e.preventDefault();
+  });
+  document.addEventListener("touchend", endDrag);
+
+  function startDrag(e) {
+    isDragging = true;
+    const rect = knob.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
   }
 
-  console.log("Entry:", entry);
-  console.log("Is ATIS?", isAtisEntry(entry));
-  console.log("Airport:", getAirportFromAtisName(entry.name));
+  function drag(e) {
+    if (!isDragging) return;
 
-  stopAtisLoop();
+    const rect = knob.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+    
+    let deltaAngle = angle - startAngle;
+    let deltaDegrees = deltaAngle * (180 / Math.PI);
+    
+    if (deltaDegrees > 180) deltaDegrees -= 360;
+    if (deltaDegrees < -180) deltaDegrees += 360;
 
-  standbyFreq = entry.freq;
-  updateDisplay();
+    currentAngle += deltaDegrees;
+    
+    if (currentAngle > 180) currentAngle = 180;
+    if (currentAngle < -180) currentAngle = -180;
 
-  const displayName = entry.name || "Unknown";
-  const freqDisplay = entry.freq || input;
+    knob.style.transform = `rotate(${currentAngle}deg)`;
 
-  if (isAtisEntry(entry)) {
-    const airport = getAirportFromAtisName(entry.name);
-    showMessage("Tuned to ATIS: " + displayName + " — " + freqDisplay);
-
-    if (airport) {
-      try {
-        const allAtis = await fetchAllAtis();
-        const atis = getAtisForAirport(allAtis, airport);
-
-        if (atis) {
-          speakAtisLoop(airport, atis);
-        } else {
-          showMessage("ATIS not found for " + airport);
-        }
-      } catch (err) {
-        console.error("Error fetching ATIS:", err);
-        showMessage("Failed to fetch ATIS for " + airport);
+    // Calculate frequency index based on angle (10 degrees per frequency)
+    const freqStep = 10;
+    const newIndex = Math.round(currentAngle / freqStep);
+    
+    if (newIndex !== currentFreqIndex && frequencies.length > 0) {
+      currentFreqIndex = newIndex;
+      
+      // Wrap around
+      if (currentFreqIndex < 0) currentFreqIndex = frequencies.length - 1;
+      if (currentFreqIndex >= frequencies.length) currentFreqIndex = 0;
+      
+      const selectedFreq = frequencies[currentFreqIndex];
+      if (selectedFreq) {
+        freqInput.value = selectedFreq.freq;
+        showMessage("Selected: " + selectedFreq.name + " - " + selectedFreq.freq);
       }
     }
-  } else {
-    showMessage("Tuned to: " + displayName + " — " + freqDisplay);
+
+    startAngle = angle;
+  }
+
+  function endDrag() {
+    isDragging = false;
+    
+    // Snap to nearest frequency (10 degrees per step)
+    const freqStep = 10;
+    currentAngle = Math.round(currentAngle / freqStep) * freqStep;
+    
+    if (currentAngle > 180) currentAngle = 180;
+    if (currentAngle < -180) currentAngle = -180;
+    
+    knob.style.transform = `rotate(${currentAngle}deg)`;
+  }
+}
+
+// Stop ATIS loop when page is unloaded/refreshed
+window.addEventListener("beforeunload", () => {
+  stopAtisLoop();
+});
+
+// Stop on page hide (when switching tabs)
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    stopAtisLoop();
   }
 });
 
+// SWAP button functionality - now swaps active with standby input
 swapBtn.addEventListener("click", async () => {
-  if (!standbyFreq) {
+  const inputFreq = freqInput.value.trim();
+  
+  if (!inputFreq) {
     showMessage("No standby frequency to swap.");
     return;
   }
 
+  const activeEntry = findFrequencyByNumber(activeFreq);
+  const standbyEntry = findFrequencyByNumber(inputFreq);
+
+  if (!standbyEntry) {
+    showMessage("Frequency not found: " + inputFreq);
+    return;
+  }
+
   stopAtisLoop();
 
+  // Swap frequencies
   const temp = activeFreq;
-  activeFreq = standbyFreq;
+  activeFreq = standbyEntry.freq;
   standbyFreq = temp;
 
   updateDisplay();
-  showMessage("Swapped. Active: " + activeFreq);
+  
+  const displayName = standbyEntry.name || "Unknown";
+  showMessage("Swapped. Active: " + activeFreq + " - " + displayName);
 
-  const activeEntry = frequencies.find(f => f.freq === activeFreq);
-  if (activeEntry && isAtisEntry(activeEntry)) {
+  // Check if new active is ATIS
+  if (isAtisEntry(activeEntry)) {
     const airport = getAirportFromAtisName(activeEntry.name);
     if (airport) {
       try {
