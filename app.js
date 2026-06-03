@@ -155,35 +155,29 @@ function formatAtisIntoLines(text) {
     line = line.replace(/\bARR\b/g, "ARRIVAL");
     line = line.replace(/\bAFCT\b/g, "AIRCRAFT");
 
+    // First: Handle runway designators with L/R/C (27L -> 2 7 LEFT, 9R -> NINER RIGHT)
+    line = line.replace(/(\d{1,3})(L)/g, (m, num) => digitsToAviation(num) + " LEFT");
+    line = line.replace(/(\d{1,3})(R)/g, (m, num) => digitsToAviation(num) + " RIGHT");
+    line = line.replace(/(\d{1,3})(C)/g, (m, num) => digitsToAviation(num) + " CENTER");
+
+    // Second: Handle standalone runway numbers (RUNWAY 27 -> RUNWAY 2 7, RUNWAY 9 -> RUNWAY NINER)
+    line = line.replace(/RUNWAY\s+(\d{1,2})\b/g, (m, num) => "RUNWAY " + digitsToAviation(num));
+
+    // Third: Handle "DEPARTURE RUNWAY X" and "ARRIVAL RUNWAY X" separately
+    line = line.replace(/DEPARTURE RUNWAY\s+(\d{1,2})/g, (m, num) => "DEPARTURE RUNWAY " + digitsToAviation(num));
+    line = line.replace(/ARRIVAL RUNWAY\s+(\d{1,2})/g, (m, num) => "ARRIVAL RUNWAY " + digitsToAviation(num));
+
     if (line.includes("DEPARTURE RUNWAY") && line.includes("ARRIVAL RUNWAY")) {
       const splitIndex = line.indexOf(" ARRIVAL RUNWAY ");
       if (splitIndex !== -1) {
         let depLine = line.substring(0, splitIndex).trim();
         let arrLine = line.substring(splitIndex + 1).trim();
 
-        depLine = depLine.replace(/(\d{1,3})(L)/g, (m, num) => digitsToAviation(num) + " LEFT");
-        depLine = depLine.replace(/(\d{1,3})(R)/g, (m, num) => digitsToAviation(num) + " RIGHT");
-        depLine = depLine.replace(/(\d{1,3})(C)/g, (m, num) => digitsToAviation(num) + " CENTER");
-        // Catch runway numbers WITHOUT L/R/C (e.g., "RUNWAY 27" -> "RUNWAY 2 7")
-        depLine = depLine.replace(/RUNWAY\s+(\d{1,2})/g, (m, num) => "RUNWAY " + digitsToAviation(num));
-
-        arrLine = arrLine.replace(/(\d{1,3})(L)/g, (m, num) => digitsToAviation(num) + " LEFT");
-        arrLine = arrLine.replace(/(\d{1,3})(R)/g, (m, num) => digitsToAviation(num) + " RIGHT");
-        arrLine = arrLine.replace(/(\d{1,3})(C)/g, (m, num) => digitsToAviation(num) + " CENTER");
-        // Catch runway numbers WITHOUT L/R/C
-        arrLine = arrLine.replace(/RUNWAY\s+(\d{1,2})/g, (m, num) => "RUNWAY " + digitsToAviation(num));
-
         lines.push(depLine);
         lines.push(arrLine);
         continue;
       }
     }
-
-    line = line.replace(/(\d{1,3})R/g, (m, num) => digitsToAviation(num) + " RIGHT");
-    line = line.replace(/(\d{1,3})L/g, (m, num) => digitsToAviation(num) + " LEFT");
-    line = line.replace(/(\d{1,3})C/g, (m, num) => digitsToAviation(num) + " CENTER");
-    // Catch standalone runway numbers (e.g., "RUNWAY 27")
-    line = line.replace(/RUNWAY\s+(\d{1,2})/g, (m, num) => "RUNWAY " + digitsToAviation(num));
 
     line = line.replace(/\b(\d{4})Z\b/g, (m, num) => digitsToAviation(num) + " ZULU");
     line = line.replace(/\bZ\b/g, " ZULU ");
@@ -404,6 +398,22 @@ swapBtn.addEventListener("click", async () => {
 
   console.log("Standby Entry:", standbyEntry);
   console.log("Standby Entry Name:", standbyEntry?.name);
+
+  // Debug: Log the ATIS content
+  if (isAtisEntry(standbyEntry)) {
+    const airport = getAirportFromAtisName(standbyEntry.name);
+    if (airport) {
+      try {
+        const allAtis = await fetchAllAtis();
+        const atis = getAtisForAirport(allAtis, airport);
+        if (atis) {
+          console.log("ATIS Content for " + airport + ":", atis.content);
+        }
+      } catch (err) {
+        console.error("Error fetching ATIS:", err);
+      }
+    }
+  }
 
   stopAtisLoop();
 
