@@ -422,12 +422,14 @@ swapBtn.addEventListener("click", async () => {
 
   const standbyEntry = findFrequencyByNumber(inputFreq);
 
+  // Stop ATIS FIRST (even if frequency not found)
+  stopAtisLoop();
+
   if (!standbyEntry) {
     showMessage("Frequency not found: " + inputFreq);
+    updateDisplay();
     return;
   }
-
-  stopAtisLoop();
 
   // Swap frequencies
   const temp = activeFreq;
@@ -458,6 +460,7 @@ swapBtn.addEventListener("click", async () => {
       }
     }
   }
+  // If new active is NOT ATIS, ATIS stays stopped (correct behavior)
 });
 
 updateDisplay();
