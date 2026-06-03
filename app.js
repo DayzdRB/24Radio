@@ -115,13 +115,15 @@ function stopAtisLoop() {
   currentAtisLoop = null;
 }
 
-// Convert digits to aviation pronunciation (9 -> Niner only)
+// Convert digits to aviation pronunciation (9 -> NINER, 0 -> ZERO)
 function digitsToAviation(numStr) {
   let result = "";
   for (let i = 0; i < numStr.length; i++) {
     const d = numStr[i];
     if (d === "9") {
       result += "NINER";
+    } else if (d === "0") {
+      result += "ZERO";
     } else {
       result += d;
     }
@@ -306,7 +308,6 @@ function speakAtisLoop(airport, atis, freqName) {
       const voice = preset.pickVoice ? preset.pickVoice() : null;
       if (voice) {
         utterance.voice = voice;
-        // Good practice: set lang to match the voice
         utterance.lang = voice.lang;
       }
       utterance.rate = preset.rate;
