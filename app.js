@@ -425,19 +425,18 @@ swapBtn.addEventListener("click", async () => {
   // Stop ATIS FIRST (even if frequency not found)
   stopAtisLoop();
 
-  if (!standbyEntry) {
-    showMessage("Frequency not found: " + inputFreq);
-    updateDisplay();
-    return;
-  }
-
-  // Swap frequencies
+  // Swap frequencies regardless of whether it exists in JSON
   const temp = activeFreq;
-  activeFreq = standbyEntry.freq;
+  activeFreq = inputFreq;
   standbyFreq = temp;
 
   updateDisplay();
   
+  if (!standbyEntry) {
+    showMessage("Frequency not found: " + inputFreq);
+    return;
+  }
+
   const displayName = standbyEntry.name || "Unknown";
   showMessage("Swapped. Active: " + activeFreq + " - " + displayName);
 
