@@ -60,7 +60,6 @@
       cursor: pointer;
       min-width: 120px;
       height: 46px;
-      line-height: 46px;
     }
 
     #swap-btn:hover {
@@ -130,16 +129,18 @@
       margin-bottom: 15px;
     }
 
-    .freq-box {
+    .freq-label-row {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
+      justify-content: center;
+      gap: 57px;
+      margin-bottom: 10px;
     }
 
     .freq-label {
       font-size: 12px;
       color: #0f0;
+      width: 120px;
+      text-align: center;
     }
   </style>
 </head>
@@ -147,17 +148,14 @@
   <h1>24Radio</h1>
 
   <div id="radio-panel">
+    <div class="freq-label-row">
+      <div class="freq-label">COM1 ACTIVE</div>
+      <div class="freq-label">COM1 STANDBY</div>
+    </div>
+
     <div class="freq-row">
-      <div class="freq-box">
-        <div class="freq-label">COM1 ACTIVE</div>
-        <div id="active-freq">---</div>
-      </div>
-
-      <div class="freq-box">
-        <div class="freq-label">COM1 STANDBY</div>
-        <input type="text" id="standby-freq" placeholder="118.100" maxlength="7">
-      </div>
-
+      <div id="active-freq">---</div>
+      <input type="text" id="standby-freq" placeholder="118.100" maxlength="7">
       <button id="swap-btn">SWAP</button>
     </div>
 
