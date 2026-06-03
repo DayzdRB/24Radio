@@ -321,6 +321,22 @@ let currentFreq = 122.800; // Start at UNICOM frequency
 // Set initial frequency in input
 freqInput.value = currentFreq.toFixed(3);
 
+// Update knob position when user types in the input
+freqInput.addEventListener("input", (e) => {
+  const typedFreq = parseFloat(e.target.value);
+  if (!isNaN(typedFreq)) {
+    currentFreq = typedFreq;
+    
+    // Calculate knob rotation based on frequency (122.800 = 0 degrees, 0.05 = 10 degrees)
+    const freqIncrement = 0.05;
+    const degreesPerStep = 10;
+    const steps = Math.round((typedFreq - 122.800) / freqIncrement);
+    totalRotation = steps * degreesPerStep;
+    
+    knob.style.transform = `rotate(${totalRotation}deg)`;
+  }
+});
+
 if (knob) {
   knob.addEventListener("mousedown", startDrag);
   document.addEventListener("mousemove", drag);
