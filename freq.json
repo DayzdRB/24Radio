@@ -311,6 +311,11 @@
 
 {
   "name": "IDCS_ATIS",
-  "freq": "118.250",
+  "freq": "118.250"
+},
+
+{
+  "name": "ITRC_ATIS",
+  "freq": "132.075"
 }
 ]
