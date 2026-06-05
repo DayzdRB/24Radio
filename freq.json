@@ -131,11 +131,7 @@
   "channelID": "1409261183877255199"
 },
 
-{
-  "name": "IDCS_TWR",
-  "freq": "118.250",
-  "channelID": "1409261335425843311"
-},
+
 
 {
   "name": "IBRD_TWR",
@@ -311,5 +307,10 @@
 {
   "name": "IZOL_ATIS",
   "freq": "124.300"
+}
+
+{
+  "name": "IDCS_ATIS",
+  "freq": "118.250",
 }
 ]
