@@ -317,5 +317,10 @@
 {
   "name": "ITRC_ATIS",
   "freq": "132.075"
+},
+
+{
+  "name": "IBLT_ATIS",
+  "freq": "122.725"
 }
 ]
