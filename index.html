@@ -28,7 +28,9 @@
       flex-wrap: wrap;
     }
 
-    /* ================= RADIO PANEL ================= */
+    /* =========================
+       RADIO PANEL (UNCHANGED)
+    ========================== */
     #radio-panel {
       background: #222;
       border: 3px solid #0f0;
@@ -60,11 +62,6 @@
       outline: none;
     }
 
-    #standby-freq:focus {
-      border-color: #0ff;
-      box-shadow: 0 0 10px #0ff;
-    }
-
     #swap-btn {
       background: #000;
       color: #0f0;
@@ -78,46 +75,9 @@
       background: #003300;
     }
 
-    /* ================= KNOB ================= */
-    .knob-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 15px;
-      user-select: none;
-    }
-
-    .knob {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: #000;
-      border: 3px solid #0f0;
-      position: relative;
-      cursor: grab;
-    }
-
-    .knob:active {
-      cursor: grabbing;
-    }
-
-    .knob-marker {
-      width: 8px;
-      height: 20px;
-      background: #0f0;
-      position: absolute;
-      top: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    .knob-label {
-      margin-top: 12px;
-      color: #0f0;
-      font-family: "Courier New", monospace;
-    }
-
-    /* ================= CONTROLLER PANEL ================= */
+    /* =========================
+       CONTROLLER PANEL
+    ========================== */
     #controller-panel {
       background: #222;
       border: 3px solid #0f0;
@@ -170,7 +130,9 @@
       font-family: "Courier New", monospace;
     }
 
-    /* ✅ FIXED ROW LAYOUT */
+    /* =========================
+       FREQUENCY ROW (FIXED)
+    ========================== */
     .freq-item {
       display: flex;
       align-items: center;
@@ -184,15 +146,15 @@
       font-size: 16px;
     }
 
-    /* pushes button to far right */
+    /* pushes tune button to far right */
     .tune-btn {
       margin-left: auto;
       background: #000;
       color: #0f0;
       border: 1px solid #0f0;
       padding: 3px 10px;
-      font-family: "Courier New", monospace;
       cursor: pointer;
+      font-family: "Courier New", monospace;
     }
 
     .tune-btn:hover {
@@ -206,7 +168,7 @@
 
   <div class="main-container">
 
-    <!-- RADIO PANEL -->
+    <!-- RADIO PANEL (UNCHANGED) -->
     <div id="radio-panel">
 
       <div class="freq-row">
@@ -219,13 +181,6 @@
         </div>
 
         <button id="swap-btn">SWAP</button>
-      </div>
-
-      <div class="knob-container">
-        <div class="knob" id="freq-knob">
-          <div class="knob-marker"></div>
-        </div>
-        <div class="knob-label">TUNE</div>
       </div>
 
     </div>
@@ -247,7 +202,7 @@
 
   <script src="app.js"></script>
 
-  <!-- ✅ TUNE FUNCTION -->
+  <!-- TUNE FUNCTION -->
   <script>
     function setStandby(freq) {
       const input = document.getElementById("standby-freq");
