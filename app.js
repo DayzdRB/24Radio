@@ -167,33 +167,24 @@ function processControllerData(){
 
 function getControllerDot(freqEntry){
 
-  if(freqEntry.type === "ATIS"){
+  const key = freqEntry.airport + "_" + freqEntry.type;
+  const controller = controllerStatus[key];
+
+  // ATIS is always green
+  if (freqEntry.type === "ATIS") {
     return "green";
   }
 
+  // CENTER logic fix
+  if (freqEntry.type === "CENTER") {
+    return controller && controller.online ? "green" : "red";
+  }
 
-  const key =
-    freqEntry.airport +
-    "_" +
-    freqEntry.type;
-
-
-  const controller =
-    controllerStatus[key];
-
-
-  if(!controller){
+  if (!controller) {
     return "red";
   }
 
-
-  if(controller.online){
-    return "green";
-  }
-
-
-  return "red";
-
+  return controller.online ? "green" : "red";
 }
 
 
