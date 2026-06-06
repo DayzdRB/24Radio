@@ -1,282 +1,305 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="Favicon.png">
-  <title>24Radio - ATC24 Radio Client</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="Favicon.png">
+<title>24Radio - ATC24 Radio Client</title>
 
-  <style>
-    body {
-      margin: 0;
-      background: #111;
-      color: #0f0;
-      font-family: Arial, sans-serif;
-    }
+<style>
+body {
+  margin: 0;
+  background: #111;
+  color: #0f0;
+  font-family: Arial, sans-serif;
+}
 
-    h1 {
-      text-align: center;
-      margin: 15px 0;
-    }
+h1 {
+  text-align: center;
+  margin: 15px 0;
+}
 
-    .main-container {
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      gap: 20px;
-      padding: 10px;
-      flex-wrap: wrap;
-    }
+.main-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 20px;
+  padding: 10px;
+  flex-wrap: wrap;
+}
 
-    /* =========================
-       RADIO PANEL (UNCHANGED)
-    ========================== */
-    #radio-panel {
-      background: #222;
-      border: 3px solid #0f0;
-      border-radius: 8px;
-      display: inline-block;
-      padding: 20px;
-      margin-top: 0;
-      flex: 00 auto;
-    }
+/* =========================
+   RADIO PANEL (UNCHANGED)
+========================= */
+#radio-panel {
+  background: #222;
+  border: 3px solid #0f0;
+  border-radius: 8px;
+  display: inline-block;
+  padding: 20px;
+  margin-top: 0;
+  flex: 0 0 auto;
+}
 
-     #active-freq {
-    font-size: 20px;
-    font-family: "Courier New", monospace;
-    background: #000;
-    border: 2px solid #0f0;
-    padding: 8px 16px;
-    display: inline-block;
+#active-freq {
+  font-size: 20px;
+  font-family: "Courier New", monospace;
+  background: #000;
+  border: 2px solid #0f0;
+  padding: 8px 16px;
+  display: inline-block;
+  width: 160px;
+  text-align: center;
+}
 
-    width: 160px;        
-    text-align: center;  
-    }
+#standby-freq {
+  background: #000;
+  color: #0f0;
+  border: 2px solid #0f0;
+  padding: 8px 16px;
+  font-size: 20px;
+  font-family: "Courier New", monospace;
+  width: 160px;
+  text-align: center;
+  outline: none;
+}
 
-    #standby-freq {
-      background: #000;
-      color: #0f0;
-      border: 2px solid #0f0;
-      padding: 8px 16px;
-      font-size: 20px;
-      font-family: "Courier New", monospace;
-      width: 160px;
-      text-align: center;
-      outline: none;
-    }
+#swap-btn {
+  background: #000;
+  color: #0f0;
+  border: 2px solid #0f0;
 
-    #swap-btn {
-      background: #000;
-      color: #0f0;
-      border: 2px solid #0f0;
-      padding: 8px 16px;
-      font-size: 20px;
-      font-family: "Courier New", monospace;
-      cursor: pointer;
-      width: 160 px;
-      height: 46 px;
+  padding: 8px 16px;
+  font-size: 20px;
+  font-family: "Courier New", monospace;
+  cursor: pointer;
 
-      display: flex;
-      align-items: center;
-      justify-context: center;
-    }
+  width: 160px;
+  height: 46px;
 
-    .knob-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      margin: 15px;
-      user-select: none;
-    }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-    .knob {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: #000;
-      border: 3px solid #0f0;
-      position: relative;
-      cursor: grab;
-    }
+#swap-btn:hover {
+  background: #003300;
+}
 
-    .knob-marker {
-      width: 8px;
-      height: 20px;
-      background: #0f0;
-      position: absolute;
-      top: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
+.freq-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
 
-    .knob-label {
-      margin-top: 12px;
-      color: #0f0;
-      font-family: "Courier New", monospace;
-      font-size: 14px;
-    }
+.freq-box-wrapper,
+.swap-box-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
 
-    /* =========================
-       CONTROLLER PANEL
-    ========================== */
-    #controller-panel {
-      background: #222;
-      border: 3px solid #0f0;
-      border-radius: 8px;
-      width: 90%;
-      max-width: 900px;
-      padding: 15px;
-      flex: 1;
-      min-width: 400px;
-    }
+/* KNOB */
+.knob-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 15px;
+  user-select: none;
+}
 
-    .panel-title {
-      color: #0f0;
-      font-family: "Courier New", monospace;
-      font-size: 14px;
-      margin-bottom: 10px;
-    }
+.knob {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #000;
+  border: 3px solid #0f0;
+  position: relative;
+  cursor: grab;
+}
 
-    .controller-toolbar {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
-    }
+.knob-marker {
+  width: 8px;
+  height: 20px;
+  background: #0f0;
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
 
-    .controller-toolbar input,
-    .controller-toolbar select {
-      background: #000;
-      color: #0f0;
-      border: 2px solid #0f0;
-      padding: 6px;
-      font-family: "Courier New", monospace;
-    }
+.knob-label {
+  margin-top: 12px;
+  color: #0f0;
+  font-family: "Courier New", monospace;
+  font-size: 14px;
+}
 
-    #frequency-list {
-      margin-top: 10px;
-      padding: 10px;
-      background: #111;
-      border: 2px solid #0f0;
-      border-radius: 6px;
-      max-height: 500px;
-      overflow-y: auto;
-    }
+/* =========================
+   CONTROLLER PANEL
+========================= */
+#controller-panel {
+  background: #222;
+  border: 3px solid #0f0;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 900px;
+  padding: 15px;
+  flex: 1;
+  min-width: 400px;
+}
 
-    .area-header {
-      margin-top: 10px;
-      padding: 6px;
-      background: #000;
-      border-left: 3px solid #0f0;
-      font-weight: bold;
-      font-family: "Courier New", monospace;
-    }
+.panel-title {
+  color: #0f0;
+  font-family: "Courier New", monospace;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
 
-    /* =========================
-       UPDATED ROW LAYOUT
-    ========================== */
-    .freq-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 6px;
-      border-bottom: 1px solid #0a0;
-      font-family: "Courier New", monospace;
-    }
+.controller-toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
 
-    .freq-item .left {
-      display: flex;
-      gap: 10px;
-      flex: 1;
-      align-items: center;
-    }
+.controller-toolbar input,
+.controller-toolbar select {
+  background: #000;
+  color: #0f0;
+  border: 2px solid #0f0;
+  padding: 6px;
+  font-family: "Courier New", monospace;
+}
 
-    .dot {
-      font-size: 16px;
-    }
+#frequency-list {
+  margin-top: 10px;
+  padding: 10px;
+  background: #111;
+  border: 2px solid #0f0;
+  border-radius: 6px;
+  max-height: 500px;
+  overflow-y: auto;
+}
 
-    .tune-btn {
-      margin-left: auto;
-      background: #000;
-      border: 2px solid #0f0;
-      color: #0f0;
-      font-family: "Courier New", monospace;
-      padding: 4px 10px;
-      cursor: pointer;
-    }
+/* =========================
+   FREQUENCY ROW + TUNE BUTTON
+========================= */
+.area-header {
+  margin-top: 10px;
+  padding: 6px;
+  background: #000;
+  border-left: 3px solid #0f0;
+  font-weight: bold;
+  font-family: "Courier New", monospace;
+}
 
-    .tune-btn:hover {
-      background: #003300;
-    }
+.freq-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  border-bottom: 1px solid #0a0;
+  font-family: "Courier New", monospace;
+}
 
-  </style>
+.freq-left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex: 1;
+}
+
+.dot {
+  font-size: 16px;
+}
+
+/* RIGHT SIDE TUNE BUTTON */
+.tune-btn {
+  margin-left: auto;
+  background: #000;
+  border: 2px solid #0f0;
+  color: #0f0;
+  font-family: "Courier New", monospace;
+  padding: 4px 10px;
+  cursor: pointer;
+  min-width: 80px;
+}
+
+.tune-btn:hover {
+  background: #003300;
+}
+</style>
 </head>
 
 <body>
-  <h1>24Radio</h1>
+<h1>24Radio</h1>
 
-  <div class="main-container">
+<div class="main-container">
 
-    <!-- RADIO PANEL (UNCHANGED) -->
-    <div id="radio-panel">
-      <div class="freq-row">
-        <div class="freq-box-wrapper">
-          <div class="freq-label">COM1 ACTIVE</div>
-          <div id="active-freq">---</div>
-        </div>
+<!-- RADIO PANEL (UNCHANGED) -->
+<div id="radio-panel">
 
-        <div class="freq-box-wrapper">
-          <div class="freq-label">COM1 STANDBY</div>
-          <input type="text" id="standby-freq" placeholder="118.100" maxlength="7">
-        </div>
-
-        <div class="swap-box-wrapper">
-          <button id="swap-btn">SWAP</button>
-        </div>
-      </div>
-
-      <div class="knob-container">
-        <div class="knob" id="freq-knob">
-          <div class="knob-marker"></div>
-        </div>
-        <div class="knob-label">TUNE</div>
-      </div>
-
-      <div id="result"></div>
+  <div class="freq-row">
+    <div class="freq-box-wrapper">
+      <div class="freq-label">COM1 ACTIVE</div>
+      <div id="active-freq">---</div>
     </div>
 
-    <!-- CONTROLLER PANEL -->
-    <div id="controller-panel">
-
-      <div class="panel-title">FREQUENCY DATABASE</div>
-
-      <div class="controller-toolbar">
-        <input type="text" id="search-bar" placeholder="Search frequencies..." />
-
-        <select id="filter-area">
-          <option value="all">All Areas</option>
-        </select>
-
-        <select id="filter-airport">
-          <option value="all">All Airports</option>
-        </select>
-
-        <select id="filter-type">
-          <option value="all">All Types</option>
-          <option value="GROUND">Ground</option>
-          <option value="TOWER">Tower</option>
-          <option value="APPROACH">Center</option>
-          <option value="ATIS">ATIS</option>
-        </select>
-      </div>
-
-      <div id="frequency-list"></div>
-
+    <div class="freq-box-wrapper">
+      <div class="freq-label">COM1 STANDBY</div>
+      <input type="text" id="standby-freq" placeholder="118.100" maxlength="7">
     </div>
 
+    <div class="swap-box-wrapper">
+      <button id="swap-btn">SWAP</button>
+    </div>
   </div>
 
-  <script src="app.js"></script>
+  <div class="knob-container">
+    <div class="knob" id="freq-knob">
+      <div class="knob-marker"></div>
+    </div>
+    <div class="knob-label">TUNE</div>
+  </div>
+
+  <div id="result"></div>
+</div>
+
+<!-- CONTROLLER PANEL -->
+<div id="controller-panel">
+
+  <div class="panel-title">FREQUENCY DATABASE</div>
+
+  <div class="controller-toolbar">
+    <input type="text" id="search-bar" placeholder="Search frequencies..." />
+
+    <select id="filter-area">
+      <option value="all">All Areas</option>
+    </select>
+
+    <select id="filter-airport">
+      <option value="all">All Airports</option>
+    </select>
+
+    <select id="filter-type">
+      <option value="all">All Types</option>
+      <option value="GROUND">Ground</option>
+      <option value="TOWER">Tower</option>
+      <option value="APPROACH">Center</option>
+      <option value="ATIS">ATIS</option>
+    </select>
+  </div>
+
+  <div id="frequency-list"></div>
+
+</div>
+
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
