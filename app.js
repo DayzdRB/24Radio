@@ -198,14 +198,14 @@ const resultEl = document.getElementById("result");
 function updateDisplay() {
   if(!activeFreqEl || !standbyFreqEl) return;
   activeFreqEl.textContent = activeFreq || "---";
-  standbyFreqEl.value = standbyFreq || "---";
+  standbyFreqEl.value = standbyFreq ?? "";
 }
+
 
 function renderFrequencyList(filteredList = frequencies) {
   const listEl = document.getElementById("frequency-list");
   listEl.innerHTML = "";
 
-  // 1. GROUP BY AREA
   const grouped = {};
 
   filteredList.forEach(freq => {
@@ -218,19 +218,23 @@ function renderFrequencyList(filteredList = frequencies) {
     grouped[area].push(freq);
   });
 
-  // 2. SORT AREAS (optional but recommended)
-  const sortedAreas = Object.keys(grouped).sort();
+  const areaOrder = [];
 
-  // 3. RENDER
-  sortedAreas.forEach(area => {
+  filteredList.forEach(freq => {
+    const area = freq.area || "UNKNOWN AREA";
+    if (!areaOrder.includes(area)) {
+      areaOrder.push(area);
+    }
+  });
 
-    // --- AREA HEADER ---
+  areaOrder.forEach(area => {
+    // AREA HEADER
     const header = document.createElement("div");
     header.className = "area-header";
     header.textContent = area;
     listEl.appendChild(header);
 
-    // --- FREQUENCIES ---
+    // FREQUENCIES
     grouped[area].forEach(freq => {
       const dotColor = getControllerDot(freq);
 
@@ -246,9 +250,11 @@ function renderFrequencyList(filteredList = frequencies) {
 
       listEl.appendChild(row);
     });
-
   });
 }
+  
+
+ 
 
 function findFrequencyByNumber(freqStr) {
   const normalizedInput = parseFloat(freqStr).toFixed(3);
@@ -403,7 +409,7 @@ function formatAtisIntoLines(text) {
       const splitIndex = line.indexOf(" ARRIVAL RUNWAY ");
       if (splitIndex !== -1) {
         let depLine = line.substring(0, splitIndex).trim();
-        let arrLine = line.substring(splitIndex + 1).trim();
+        line.substring(splitIndex + " ARRIVAL RUNWAY ".length)
 
         lines.push(depLine);
         lines.push(arrLine);
