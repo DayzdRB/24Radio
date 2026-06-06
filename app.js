@@ -769,3 +769,21 @@ if (swapBtn) {
 
 updateDisplay();
 
+// ==== STEP SIZE TOGGLE ==== //
+window.addEventListener("DOMContentLoaded", () => {
+  const stepBtn = document.getElementById("step-btn");
+  if (!stepBtn) return;
+
+  const steps = [0.005, 0.05, 0.1];
+  let stepIndex = 1; // default = 0.05
+
+  // ensure UI matches initial value
+  stepBtn.textContent = `STEP: ${steps[stepIndex].toFixed(3)}`;
+
+  stepBtn.addEventListener("click", () => {
+    stepIndex = (stepIndex + 1) % steps.length;
+    GlobalfreqIncrement = steps[stepIndex];
+
+    stepBtn.textContent = `STEP: ${GlobalfreqIncrement.toFixed(3)}`;
+  });
+});
