@@ -592,7 +592,7 @@ standbyFreqEl.addEventListener("input", (e) => {
   const typedFreq = parseFloat(e.target.value);
   if (!isNaN(typedFreq)) {
     currentFreq = typedFreq;
-    const freqIncrement = 0.05;
+    const freqIncrement = 0.005;
     const degreesPerStep = 10;
     const steps = Math.round((typedFreq - 122.800) / freqIncrement);
     totalRotation = steps * degreesPerStep;
@@ -640,7 +640,7 @@ if (knob) {
 
     knob.style.transform = `rotate(${totalRotation}deg)`;
 
-    const freqIncrement = 0.05;
+    const freqIncrement = 0.005;
     const degreesPerStep = 10;
     const steps = Math.round(totalRotation / degreesPerStep);
     
