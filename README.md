@@ -17,3 +17,8 @@ Add ATiS voice controls
 6/5/26
 Today I updated the freq.josn to support the upcoming 1.1 update to show all frequencies on the main page
 I added /controllers API support
+
+6/6/2026
+I added a Frequency Data base with quick tune buttons
+I added a Knob tune increment button for easy tuning
+
