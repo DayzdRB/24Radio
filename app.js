@@ -127,11 +127,9 @@ async function initializeApp(){
   await loadcontrollers();
 
   renderFrequencyList();
- 
-
 }
+window.addEventListener("DOMContentLoaded", initializeApp);
 
-initializeApp();
 
 
 
@@ -206,8 +204,30 @@ const swapBtn = document.getElementById("swap-btn");
 const resultEl = document.getElementById("result");
 
 function updateDisplay() {
+  if(!activeFreqEl || !standbyFreqEl) return;
   activeFreqEl.textContent = activeFreq || "---";
-  standbyFreqEl.value = standbyFreq || "---";
+  standbyFreqEl.value = standbyFreq || "";
+}
+
+function renderFrequencyList(filteredList = frequencies) {
+  const listEl = document.getElementById("frequency-list");
+  listEl.innerHTML = "";
+
+  filteredList.forEach(freq => {
+    const dotColor = getControllerDot(freq);
+
+    const row = document.createElement("div");
+    row.className = "freq-item";
+
+    row.innerHTML = `
+      <span class="dot" style="color:${dotColor}">●</span>
+      <span class="freq">${freq.freq}</span>
+      <span class="name">${freq.name || ""}</span>
+      <span class="type">${freq.type}</span>
+    `;
+
+    listEl.appendChild(row);
+  });
 }
 
 function findFrequencyByNumber(freqStr) {
