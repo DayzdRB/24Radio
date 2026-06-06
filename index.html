@@ -28,28 +28,24 @@ h1 {
   flex-wrap: wrap;
 }
 
-/* =========================
-   RADIO PANEL (UNCHANGED)
-========================= */
+/* RADIO PANEL */
 #radio-panel {
   background: #222;
   border: 3px solid #0f0;
   border-radius: 8px;
   display: inline-block;
   padding: 20px;
-  margin-top: 0;
   flex: 0 0 auto;
-
-   position: relative;
+  position: relative;
 }
 
+/* FREQ DISPLAYS */
 #active-freq {
   font-size: 20px;
   font-family: "Courier New", monospace;
   background: #000;
   border: 2px solid #0f0;
   padding: 8px 16px;
-  display: inline-block;
   width: 160px;
   text-align: center;
 }
@@ -66,19 +62,17 @@ h1 {
   outline: none;
 }
 
+/* SWAP */
 #swap-btn {
   background: #000;
   color: #0f0;
   border: 2px solid #0f0;
-
   padding: 8px 16px;
   font-size: 20px;
   font-family: "Courier New", monospace;
   cursor: pointer;
-
   width: 160px;
   height: 46px;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -88,6 +82,7 @@ h1 {
   background: #003300;
 }
 
+/* ROW */
 .freq-row {
   display: flex;
   align-items: flex-end;
@@ -100,7 +95,6 @@ h1 {
 .swap-box-wrapper {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
 }
 
 /* KNOB */
@@ -108,9 +102,9 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   margin: 15px;
   user-select: none;
+  position: relative;
 }
 
 .knob {
@@ -135,14 +129,34 @@ h1 {
 
 .knob-label {
   margin-top: 12px;
-  color: #0f0;
   font-family: "Courier New", monospace;
   font-size: 14px;
 }
 
-/* =========================
-   CONTROLLER PANEL
-========================= */
+/* STEP BUTTON (BOTTOM RIGHT OF PANEL) */
+#step-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+
+  background: #000;
+  color: #0f0;
+  border: 2px solid #0f0;
+
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+
+  padding: 4px 8px;
+  cursor: pointer;
+
+  user-select: none;
+}
+
+#step-btn:hover {
+  background: #003300;
+}
+
+/* CONTROLLER PANEL */
 #controller-panel {
   background: #222;
   border: 3px solid #0f0;
@@ -155,7 +169,6 @@ h1 {
 }
 
 .panel-title {
-  color: #0f0;
   font-family: "Courier New", monospace;
   font-size: 14px;
   margin-bottom: 10px;
@@ -186,74 +199,6 @@ h1 {
   max-height: 500px;
   overflow-y: auto;
 }
-
-/* =========================
-   FREQUENCY ROW + TUNE BUTTON
-========================= */
-.area-header {
-  margin-top: 10px;
-  padding: 6px;
-  background: #000;
-  border-left: 3px solid #0f0;
-  font-weight: bold;
-  font-family: "Courier New", monospace;
-}
-
-.freq-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px;
-  border-bottom: 1px solid #0a0;
-  font-family: "Courier New", monospace;
-}
-
-.freq-left {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex: 1;
-}
-
-.dot {
-  font-size: 16px;
-}
-
-/* RIGHT SIDE TUNE BUTTON */
-.tune-btn {
-  margin-left: auto;
-  background: #000;
-  border: 2px solid #0f0;
-  color: #0f0;
-  font-family: "Courier New", monospace;
-  padding: 4px 10px;
-  cursor: pointer;
-  min-width: 80px;
-}
-
-.tune-btn:hover {
-  background: #003300;
-}
-
-#step-btn {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-
-  background: #000;
-  color: #0f0;
-  border: 2px solid #0f0;
-
-  font-family: "Courier New", monospace;
-  font-size: 12px;
-
-  padding: 4px 8px;
-  cursor: pointer;
-}
-
-#step-btn:hover {
-  background: #003300;
-}
 </style>
 </head>
 
@@ -262,21 +207,20 @@ h1 {
 
 <div class="main-container">
 
-<!-- RADIO PANEL (UNCHANGED) -->
 <div id="radio-panel">
 
   <div class="freq-row">
-    <div class="freq-box-wrapper">
-      <div class="freq-label">COM1 ACTIVE</div>
+    <div>
+      <div>COM1 ACTIVE</div>
       <div id="active-freq">---</div>
     </div>
 
-    <div class="freq-box-wrapper">
-      <div class="freq-label">COM1 STANDBY</div>
+    <div>
+      <div>COM1 STANDBY</div>
       <input type="text" id="standby-freq" placeholder="118.100" maxlength="7">
     </div>
 
-    <div class="swap-box-wrapper">
+    <div>
       <button id="swap-btn">SWAP</button>
     </div>
   </div>
@@ -287,13 +231,13 @@ h1 {
     </div>
     <div class="knob-label">TUNE</div>
 
-    <button id="step-btn">STEP: 0.050</button>
+    <!-- STEP BUTTON -->
+    <button id="step-btn" data-step="0.05">STEP: 0.050</button>
   </div>
 
   <div id="result"></div>
 </div>
 
-<!-- CONTROLLER PANEL -->
 <div id="controller-panel">
 
   <div class="panel-title">FREQUENCY DATABASE</div>
