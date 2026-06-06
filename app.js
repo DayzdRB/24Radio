@@ -242,11 +242,14 @@ function renderFrequencyList(filteredList = frequencies) {
       row.className = "freq-item";
 
       row.innerHTML = `
-        <span class="dot" style="color:${dotColor}">●</span>
-        <span class="freq">${freq.freq}</span>
-        <span class="name">${freq.name || ""}</span>
-        <span class="type">${freq.type}</span>
-      `;
+      <div class="freq-left">
+      <span class="dot" style="color:${dotColor}">●</span>
+      <span class="freq">${freq.freq}</span>
+      <span class="name">${freq.name || ""}</span>
+      <span class="type">${freq.type}</span>
+      </div>
+      <button class="tune-btn" onclick="tuneFrequency('${freq.freq}')">TUNE</button>
+    `;
 
       listEl.appendChild(row);
     });
