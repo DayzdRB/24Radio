@@ -271,6 +271,8 @@ function showMessage(message) {
 function tuneFrequency(freq) {
   const standby = document.getElementById("standby-freq");
   standby.value = freq;
+
+  showMessage("Tuned standby to " + freq);
 }
 
 function isAtisEntry(entry){
