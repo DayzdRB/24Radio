@@ -1,4 +1,6 @@
 let frequencies = [];
+let controllers = [];
+let controllerStatus = {};
 let activeFreq = null;
 let standbyFreq = null;
 let currentAtisLoop = null;
@@ -77,7 +79,7 @@ function getRandomTtsPreset(previousPreset) {
   return candidate;
 }
 
-// =============================== //
+// ==== CONTROLLER STATUS / DOT LOGIC ==== //
 
 async function loadfrequencies() {
   try {
@@ -94,7 +96,107 @@ async function loadfrequencies() {
   }
 }
 
-loadfrequencies();
+async function loadcontrollers() {
+  try {
+    const response = await fetch("/api/controllers");
+
+    if (!response.ok) {
+      throw new Error("Controller API error: " + response.status);
+    }
+
+    const data = await response.json();
+
+    controllers = data;
+
+    processControllerData();
+
+    console.log("Controllers loaded:", controllers);
+
+  } catch(error) {
+    console.error("Error loading controllers:", error);
+  }
+}
+
+
+
+
+
+async function initializeApp(){
+
+  await loadfrequencies();
+  await loadcontrollers();
+
+ 
+
+}
+
+initializeApp();
+
+
+
+
+
+
+
+
+
+// Stores controller status by airport_position
+
+
+function processControllerData(){
+
+  controllerStatus = {};
+
+  controllers.forEach(controller => {
+
+    const key =
+      controller.airport +
+      "_" +
+      controller.position;
+
+
+    controllerStatus[key] = {
+      online: !controller.claimable,
+      holder: controller.holder
+    };
+
+  });
+
+  console.log("Processed controller status:", controllerStatus);
+}
+
+function getControllerDot(freqEntry){
+
+  if(freqEntry.type === "ATIS"){
+    return "green";
+  }
+
+
+  const key =
+    freqEntry.airport +
+    "_" +
+    freqEntry.type;
+
+
+  const controller =
+    controllerStatus[key];
+
+
+  if(!controller){
+    return "red";
+  }
+
+
+  if(controller.online){
+    return "green";
+  }
+
+
+  return "red";
+
+}
+
+
 
 const activeFreqEl = document.getElementById("active-freq");
 const standbyFreqEl = document.getElementById("standby-freq");
@@ -116,14 +218,23 @@ function showMessage(message) {
   resultEl.textContent = message;
 }
 
-function isAtisEntry(entry) {
-  return entry && !entry.channelID;
+function isAtisEntry(entry){
+
+  return (
+    entry &&
+    entry.type === "ATIS"
+  );
+
 }
 
-function getAirportFromAtisName(name) {
-  if (!name) return null;
-  const parts = name.split("_");
-  return parts[0] || null;
+function getAirportFromEntry(entry){
+
+  if(!entry)
+    return null;
+
+
+  return entry.airport;
+
 }
 
 async function fetchAllAtis() {
@@ -527,7 +638,7 @@ swapBtn.addEventListener("click", async () => {
   showMessage("Swapped. Active: " + activeFreq + " - " + displayName);
 
   if (isAtisEntry(standbyEntry)) {
-    const airport = getAirportFromAtisName(standbyEntry.name);
+    const airport = getAirportFromEntry(standbyEntry);
     console.log("Airport:", airport);
     console.log("Frequency Name:", standbyEntry.name);
     
