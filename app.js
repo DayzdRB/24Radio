@@ -270,7 +270,7 @@ function showMessage(message) {
 function tuneFrequency(freq) {
   const standby = document.getElementById("standby-freq");
 
-  currentFreq = parseFloat(freq);
+  currentFreq = parseFloat(freq).toFixed(3);
 
   standby.value = currentFreq.toFixed(3);
 
