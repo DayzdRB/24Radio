@@ -28,68 +28,24 @@ h1 {
   flex-wrap: wrap;
 }
 
-/* =========================
-   RADIO PANEL
-========================= */
+/* RADIO PANEL */
 #radio-panel {
   background: #222;
   border: 3px solid #0f0;
   border-radius: 8px;
   display: inline-block;
   padding: 20px;
-  margin-top: 0;
   flex: 0 0 auto;
   position: relative;
 }
 
-#active-freq {
-  font-size: 20px;
-  font-family: "Courier New", monospace;
-  background: #000;
-  border: 2px solid #0f0;
-  padding: 8px 16px;
-  display: inline-block;
-  width: 160px;
-  text-align: center;
-}
-
-#standby-freq {
-  background: #000;
-  color: #0f0;
-  border: 2px solid #0f0;
-  padding: 8px 16px;
-  font-size: 20px;
-  font-family: "Courier New", monospace;
-  width: 160px;
-  text-align: center;
-  outline: none;
-}
-
-#swap-btn {
-  background: #000;
-  color: #0f0;
-  border: 2px solid #0f0;
-  padding: 8px 16px;
-  font-size: 20px;
-  font-family: "Courier New", monospace;
-  cursor: pointer;
-  width: 160px;
-  height: 46px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#swap-btn:hover {
-  background: #003300;
-}
-
+/* FREQ ROW (TOP) */
 .freq-row {
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
   gap: 15px;
   margin-bottom: 15px;
+  justify-content: center;
+  align-items: flex-end;
 }
 
 .freq-box-wrapper,
@@ -99,32 +55,46 @@ h1 {
   justify-content: flex-end;
 }
 
-/* =========================
-   KNOB + STEP ALIGNMENT FIX
-========================= */
-
-.knob-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 15px;
-  margin: 15px;
+#active-freq,
+#standby-freq {
+  font-family: "Courier New", monospace;
+  font-size: 20px;
+  width: 160px;
+  text-align: center;
+  background: #000;
+  color: #0f0;
+  border: 2px solid #0f0;
+  padding: 8px 16px;
 }
 
+/* SWAP */
+#swap-btn {
+  width: 160px;
+  height: 46px;
+  background: #000;
+  color: #0f0;
+  border: 2px solid #0f0;
+  font-family: "Courier New", monospace;
+  cursor: pointer;
+}
+
+/* 🔥 NEW GRID ROW FOR KNOB + STEP */
+.control-row {
+  display: grid;
+  grid-template-columns: 1fr 160px 1fr;
+  align-items: center;
+  margin-top: 15px;
+}
+
+/* KNOB CENTER COLUMN */
 .knob-container {
+  grid-column: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   user-select: none;
 }
 
-.step-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-/* KNOB */
 .knob {
   width: 100px;
   height: 100px;
@@ -147,13 +117,17 @@ h1 {
 
 .knob-label {
   margin-top: 12px;
-  color: #0f0;
-  font-family: "Courier New", monospace;
   font-size: 14px;
 }
 
-/* STEP BUTTON */
+/* STEP BUTTON EXACTLY UNDER STANDBY COLUMN */
 #step-btn {
+  grid-column: 2;
+  margin-top: 15px;
+
+  width: 160px;
+  height: 46px;
+
   background: #000;
   color: #0f0;
   border: 2px solid #0f0;
@@ -161,27 +135,20 @@ h1 {
   font-family: "Courier New", monospace;
   font-size: 14px;
 
-  padding: 8px 16px;
-
-  cursor: pointer;
-
-  width: 160px;
-  height: 46px;
-
   display: flex;
   align-items: center;
   justify-content: center;
 
   white-space: nowrap;
+
+  cursor: pointer;
 }
 
 #step-btn:hover {
   background: #003300;
 }
 
-/* =========================
-   CONTROLLER PANEL
-========================= */
+/* CONTROLLER PANEL (UNCHANGED) */
 #controller-panel {
   background: #222;
   border: 3px solid #0f0;
@@ -194,7 +161,6 @@ h1 {
 }
 
 .panel-title {
-  color: #0f0;
   font-family: "Courier New", monospace;
   font-size: 14px;
   margin-bottom: 10px;
@@ -226,16 +192,12 @@ h1 {
   overflow-y: auto;
 }
 
-/* =========================
-   FREQUENCY ROW + TUNE BUTTON
-========================= */
 .area-header {
   margin-top: 10px;
   padding: 6px;
   background: #000;
   border-left: 3px solid #0f0;
   font-weight: bold;
-  font-family: "Courier New", monospace;
 }
 
 .freq-item {
@@ -244,18 +206,12 @@ h1 {
   gap: 10px;
   padding: 6px;
   border-bottom: 1px solid #0a0;
-  font-family: "Courier New", monospace;
 }
 
 .freq-left {
   display: flex;
   gap: 10px;
-  align-items: center;
   flex: 1;
-}
-
-.dot {
-  font-size: 16px;
 }
 
 .tune-btn {
@@ -263,19 +219,14 @@ h1 {
   background: #000;
   border: 2px solid #0f0;
   color: #0f0;
-  font-family: "Courier New", monospace;
-  padding: 4px 10px;
   cursor: pointer;
-  min-width: 80px;
 }
 
-.tune-btn:hover {
-  background: #003300;
-}
 </style>
 </head>
 
 <body>
+
 <h1>24Radio</h1>
 
 <div class="main-container">
@@ -284,13 +235,13 @@ h1 {
 
   <div class="freq-row">
     <div class="freq-box-wrapper">
-      <div class="freq-label">COM1 ACTIVE</div>
+      <div>COM1 ACTIVE</div>
       <div id="active-freq">---</div>
     </div>
 
     <div class="freq-box-wrapper">
-      <div class="freq-label">COM1 STANDBY</div>
-      <input type="text" id="standby-freq" placeholder="118.100" maxlength="7">
+      <div>COM1 STANDBY</div>
+      <input id="standby-freq" placeholder="118.100">
     </div>
 
     <div class="swap-box-wrapper">
@@ -298,8 +249,10 @@ h1 {
     </div>
   </div>
 
-  <!-- FIXED ALIGNMENT ROW -->
-  <div class="knob-row">
+  <!-- CONTROL GRID -->
+  <div class="control-row">
+
+    <div></div>
 
     <div class="knob-container">
       <div class="knob" id="freq-knob">
@@ -308,41 +261,28 @@ h1 {
       <div class="knob-label">TUNE</div>
     </div>
 
-    <div class="step-container">
-      <button id="step-btn">STEP: 0.050</button>
-    </div>
+    <div></div>
 
   </div>
+
+  <!-- STEP aligned under STANDBY -->
+  <button id="step-btn">STEP: 0.050</button>
 
   <div id="result"></div>
 </div>
 
 <div id="controller-panel">
-
   <div class="panel-title">FREQUENCY DATABASE</div>
 
   <div class="controller-toolbar">
     <input type="text" id="search-bar" placeholder="Search frequencies..." />
 
-    <select id="filter-area">
-      <option value="all">All Areas</option>
-    </select>
-
-    <select id="filter-airport">
-      <option value="all">All Airports</option>
-    </select>
-
-    <select id="filter-type">
-      <option value="all">All Types</option>
-      <option value="GROUND">Ground</option>
-      <option value="TOWER">Tower</option>
-      <option value="APPROACH">Center</option>
-      <option value="ATIS">ATIS</option>
-    </select>
+    <select id="filter-area"></select>
+    <select id="filter-airport"></select>
+    <select id="filter-type"></select>
   </div>
 
   <div id="frequency-list"></div>
-
 </div>
 
 </div>
