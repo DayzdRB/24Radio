@@ -126,6 +126,7 @@ async function initializeApp(){
   await loadfrequencies();
   await loadcontrollers();
 
+  renderFrequencyList();
  
 
 }
