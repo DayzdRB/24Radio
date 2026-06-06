@@ -270,7 +270,7 @@ function showMessage(message) {
 function tuneFrequency(freq) {
   const standby = document.getElementById("standby-freq");
 
-  currentFreq = parseFloat(freq).toFixed(3);
+  currentFreq = Number(parseFloat(freq).toFixed(3));
 
   standby.value = currentFreq.toFixed(3);
 
@@ -591,7 +591,7 @@ standbyFreqEl.value = currentFreq.toFixed(3);
 standbyFreqEl.addEventListener("input", (e) => {
   const typedFreq = parseFloat(e.target.value);
   if (!isNaN(typedFreq)) {
-    currentFreq = typedFreq;
+    currentFreq = Number(typedFreq.toFixed(3));
     const freqIncrement = 0.005;
     const degreesPerStep = 10;
     const steps = Math.round((typedFreq - 122.800) / freqIncrement);
@@ -624,50 +624,62 @@ if (knob) {
   }
 
   function drag(e) {
-    if (!isDragging) return;
+  if (!isDragging) return;
 
-    const rect = knob.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
-    
-    let deltaAngle = angle - startAngle;
-    if (deltaAngle > Math.PI) deltaAngle -= 2 * Math.PI;
-    if (deltaAngle < -Math.PI) deltaAngle += 2 * Math.PI;
-    
-    let deltaDegrees = deltaAngle * (180 / Math.PI);
-    totalRotation += deltaDegrees;
+  const rect = knob.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
 
-    knob.style.transform = `rotate(${totalRotation}deg)`;
+  let deltaAngle = angle - startAngle;
+  if (deltaAngle > Math.PI) deltaAngle -= 2 * Math.PI;
+  if (deltaAngle < -Math.PI) deltaAngle += 2 * Math.PI;
 
-    const freqIncrement = 0.005;
-    const degreesPerStep = 10;
-    const steps = Math.round(totalRotation / degreesPerStep);
-    
-    const newFreq = 122.800 + (steps * freqIncrement);
-    const roundedFreq = Math.round(newFreq * 1000) / 1000;
-    
-    if (roundedFreq !== currentFreq) {
-      currentFreq = roundedFreq;
-      standbyFreqEl.value = currentFreq.toFixed(3);
-      showMessage("Frequency: " + currentFreq.toFixed(3));
-    }
+  let deltaDegrees = deltaAngle * (180 / Math.PI);
+  totalRotation += deltaDegrees;
 
-    startAngle = angle;
-  }
+  knob.style.transform = `rotate(${totalRotation}deg)`;
 
-  function endDrag() {
-    isDragging = false;
-    const degreesPerStep = 10;
-    totalRotation = Math.round(totalRotation / degreesPerStep) * degreesPerStep;
-    knob.style.transform = `rotate(${totalRotation}deg)`;
-    
-    const freqIncrement = 0.05;
-    const steps = Math.round(totalRotation / degreesPerStep);
-    const newFreq = 122.800 + (steps * freqIncrement);
-    currentFreq = Math.round(newFreq * 1000) / 1000;
+  const freqIncrement = 0.005;
+  const degreesPerStep = 10;
+
+  const steps = Math.round(totalRotation / degreesPerStep);
+
+  const newFreq = 122.800 + (steps * freqIncrement);
+  const roundedFreq = Number(newFreq.toFixed(3));
+
+  if (roundedFreq !== currentFreq) {
+    currentFreq = roundedFreq;
     standbyFreqEl.value = currentFreq.toFixed(3);
+    showMessage("Frequency: " + currentFreq.toFixed(3));
   }
+
+  startAngle = angle;
+}
+
+
+function endDrag() {
+  isDragging = false;
+
+  const degreesPerStep = 10;
+
+  totalRotation =
+    Math.round(totalRotation / degreesPerStep) * degreesPerStep;
+
+  knob.style.transform = `rotate(${totalRotation}deg)`;
+
+  const freqIncrement = 0.005;
+
+  const steps = Math.round(totalRotation / degreesPerStep);
+
+  const newFreq = 122.800 + (steps * freqIncrement);
+
+  currentFreq = Number(newFreq.toFixed(3));
+
+  standbyFreqEl.value = currentFreq.toFixed(3);
+}
+
+
 }
 
 window.addEventListener("beforeunload", () => {
