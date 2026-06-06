@@ -68,11 +68,45 @@
       border: 2px solid #0f0;
       padding: 8px 16px;
       font-size: 20px;
+      font-family: "Courier New", monospace;
       cursor: pointer;
+      min-width: 120px;
     }
 
-    #swap-btn:hover {
-      background: #003300;
+    .knob-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 15px;
+      user-select: none;
+    }
+
+    .knob {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: #000;
+      border: 3px solid #0f0;
+      position: relative;
+      cursor: grab;
+    }
+
+    .knob-marker {
+      width: 8px;
+      height: 20px;
+      background: #0f0;
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .knob-label {
+      margin-top: 12px;
+      color: #0f0;
+      font-family: "Courier New", monospace;
+      font-size: 14px;
     }
 
     /* =========================
@@ -88,11 +122,10 @@
     }
 
     .panel-title {
+      color: #0f0;
       font-family: "Courier New", monospace;
       font-size: 14px;
       margin-bottom: 10px;
-      border-bottom: 1px solid #0f0;
-      padding-bottom: 6px;
     }
 
     .controller-toolbar {
@@ -131,35 +164,42 @@
     }
 
     /* =========================
-       FREQUENCY ROW (FIXED)
+       UPDATED ROW LAYOUT
     ========================== */
     .freq-item {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 4px 6px;
+      padding: 6px;
       border-bottom: 1px solid #0a0;
       font-family: "Courier New", monospace;
+    }
+
+    .freq-item .left {
+      display: flex;
+      gap: 10px;
+      flex: 1;
+      align-items: center;
     }
 
     .dot {
       font-size: 16px;
     }
 
-    /* pushes tune button to far right */
     .tune-btn {
       margin-left: auto;
       background: #000;
+      border: 2px solid #0f0;
       color: #0f0;
-      border: 1px solid #0f0;
-      padding: 3px 10px;
-      cursor: pointer;
       font-family: "Courier New", monospace;
+      padding: 4px 10px;
+      cursor: pointer;
     }
 
     .tune-btn:hover {
       background: #003300;
     }
+
   </style>
 </head>
 
@@ -170,19 +210,30 @@
 
     <!-- RADIO PANEL (UNCHANGED) -->
     <div id="radio-panel">
-
       <div class="freq-row">
         <div class="freq-box-wrapper">
+          <div class="freq-label">COM1 ACTIVE</div>
           <div id="active-freq">---</div>
         </div>
 
         <div class="freq-box-wrapper">
-          <input type="text" id="standby-freq" placeholder="118.100">
+          <div class="freq-label">COM1 STANDBY</div>
+          <input type="text" id="standby-freq" placeholder="118.100" maxlength="7">
         </div>
 
-        <button id="swap-btn">SWAP</button>
+        <div class="swap-box-wrapper">
+          <button id="swap-btn">SWAP</button>
+        </div>
       </div>
 
+      <div class="knob-container">
+        <div class="knob" id="freq-knob">
+          <div class="knob-marker"></div>
+        </div>
+        <div class="knob-label">TUNE</div>
+      </div>
+
+      <div id="result"></div>
     </div>
 
     <!-- CONTROLLER PANEL -->
@@ -191,7 +242,23 @@
       <div class="panel-title">FREQUENCY DATABASE</div>
 
       <div class="controller-toolbar">
-        <input type="text" id="search-bar" placeholder="Search frequencies...">
+        <input type="text" id="search-bar" placeholder="Search frequencies..." />
+
+        <select id="filter-area">
+          <option value="all">All Areas</option>
+        </select>
+
+        <select id="filter-airport">
+          <option value="all">All Airports</option>
+        </select>
+
+        <select id="filter-type">
+          <option value="all">All Types</option>
+          <option value="GROUND">Ground</option>
+          <option value="TOWER">Tower</option>
+          <option value="APPROACH">Center</option>
+          <option value="ATIS">ATIS</option>
+        </select>
       </div>
 
       <div id="frequency-list"></div>
@@ -201,15 +268,5 @@
   </div>
 
   <script src="app.js"></script>
-
-  <!-- TUNE FUNCTION -->
-  <script>
-    function setStandby(freq) {
-      const input = document.getElementById("standby-freq");
-      input.value = freq;
-      input.dispatchEvent(new Event("input"));
-    }
-  </script>
-
 </body>
 </html>
