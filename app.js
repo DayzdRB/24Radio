@@ -191,7 +191,6 @@ function getControllerDot(freqEntry){
 
 const activeFreqEl = document.getElementById("active-freq");
 const standbyFreqEl = document.getElementById("standby-freq");
-const standbyFreqEl = document.getElementById("standby-freq");
 const swapBtn = document.getElementById("swap-btn");
 const resultEl = document.getElementById("result");
 
@@ -571,9 +570,9 @@ let startAngle = 0;
 let totalRotation = 0;
 let currentFreq = 122.800;
 
-freqInput.value = currentFreq.toFixed(3);
+standbyFreqEl.value = currentFreq.toFixed(3);
 
-freqInput.addEventListener("input", (e) => {
+StandbyFreqEl.addEventListener("input", (e) => {
   const typedFreq = parseFloat(e.target.value);
   if (!isNaN(typedFreq)) {
     currentFreq = typedFreq;
