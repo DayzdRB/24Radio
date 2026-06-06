@@ -663,57 +663,81 @@ document.addEventListener("visibilitychange", () => {
     stopAtisLoop();
   }
 });
+if (swapBtn) {
+  swapBtn.addEventListener("click", async () => {
+    const inputFreq = standbyFreqEl.value.trim();
 
-swapBtn.addEventListener("click", async () => {
-  const inputFreq = standbyFreqEl.value.trim();
-  
-  if (!inputFreq) {
-    showMessage("No standby frequency to swap.");
-    return;
-  }
+    if (!inputFreq) {
+      showMessage("No standby frequency to swap.");
+      return;
+    }
 
-  const standbyEntry = findFrequencyByNumber(inputFreq);
+    const standbyEntry = findFrequencyByNumber(inputFreq);
 
-  console.log("Standby Entry:", standbyEntry);
-  console.log("Standby Entry Name:", standbyEntry?.name);
+    console.log("Standby Entry:", standbyEntry);
+    console.log("Standby Entry Name:", standbyEntry?.name);
 
-  stopAtisLoop();
+    stopAtisLoop();
 
-  const temp = activeFreq;
-  activeFreq = inputFreq;
-  standbyFreq = temp;
+    // Swap active and standby
+    const temp = activeFreq;
+    activeFreq = inputFreq;
+    standbyFreq = temp;
 
-  updateDisplay();
-  
-  if (!standbyEntry) {
-    showMessage("Frequency not found: " + inputFreq);
-    return;
-  }
+    updateDisplay();
 
-  const displayName = standbyEntry.name || "Unknown";
-  showMessage("Swapped. Active: " + activeFreq + " - " + displayName);
+    if (!standbyEntry) {
+      showMessage("Frequency not found: " + inputFreq);
+      return;
+    }
 
-  if (isAtisEntry(standbyEntry)) {
-    const airport = getAirportFromEntry(standbyEntry);
-    console.log("Airport:", airport);
-    console.log("Frequency Name:", standbyEntry.name);
-    
-    if (airport) {
+    const displayName = standbyEntry.name || "Unknown";
+
+    showMessage(
+      "Swapped. Active: " + activeFreq + " - " + displayName
+    );
+
+    // Handle ATIS frequencies
+    if (isAtisEntry(standbyEntry)) {
+
+      const airport = getAirportFromEntry(standbyEntry);
+
+      console.log("Airport:", airport);
+      console.log("Frequency Name:", standbyEntry.name);
+
+      if (!airport) return;
+
       try {
+
         const allAtis = await fetchAllAtis();
         const atis = getAtisForAirport(allAtis, airport);
 
         if (atis) {
-          speakAtisLoop(airport, atis, standbyEntry.name);
+          speakAtisLoop(
+            airport,
+            atis,
+            standbyEntry.name
+          );
         } else {
-          showMessage(standbyEntry.name + " - ATIS not found");
+          showMessage(
+            standbyEntry.name + " - ATIS not found"
+          );
         }
+
       } catch (err) {
-        console.error("Error fetching ATIS after swap:", err);
-        showMessage(standbyEntry.name + " - Failed to fetch ATIS");
+
+        console.error(
+          "Error fetching ATIS after swap:",
+          err
+        );
+
+        showMessage(
+          standbyEntry.name + " - Failed to fetch ATIS"
+        );
       }
     }
-  }
-});
+  });
+}
 
 updateDisplay();
+
