@@ -154,7 +154,7 @@ async function initializeApp(){
   await loadfrequencies();
   await loadcontrollers();
 
-  applyfilters();
+  applyFilters();
 }
 window.addEventListener("DOMContentLoaded", initializeApp);
 
