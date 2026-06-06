@@ -120,11 +120,17 @@ async function loadcontrollers() {
 
 
 function applyFilters() {
+
+  
+  
   const searchValue = document.getElementById("search-bar").value.toLowerCase();
   const areaFilter = document.getElementById("filter-area").value;
   const airportFilter = document.getElementById("filter-airport").value;
   const typeFilter = document.getElementById("filter-type").value;
 
+  console.log("Sample types:", [...new Set(frequencies.map(f => f.type))]);
+  console.log("Selected type:", typeFilter);
+  
   const filtered = frequencies.filter(freq => {
 
     const matchesSearch =
