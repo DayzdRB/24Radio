@@ -269,9 +269,25 @@ function showMessage(message) {
 
 function tuneFrequency(freq) {
   const standby = document.getElementById("standby-freq");
-  standby.value = freq;
 
-  showMessage("Tuned standby to " + freq);
+  currentFreq = parseFloat(freq);
+
+  standby.value = currentFreq.toFixed(3);
+
+  const freqIncrement = 0.05;
+  const degreesPerStep = 10;
+
+  const steps = Math.round(
+    (currentFreq - 122.800) / freqIncrement
+  );
+
+  totalRotation = steps * degreesPerStep;
+
+  if (knob) {
+    knob.style.transform = `rotate(${totalRotation}deg)`;
+  }
+
+  showMessage("Tuned standby to " + currentFreq.toFixed(3));
 }
 
 function isAtisEntry(entry){
