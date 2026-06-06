@@ -191,7 +191,7 @@ function getControllerDot(freqEntry){
 
 const activeFreqEl = document.getElementById("active-freq");
 const standbyFreqEl = document.getElementById("standby-freq");
-const freqInput = document.getElementById("standby-freq");
+const standbyFreqEl = document.getElementById("standby-freq");
 const swapBtn = document.getElementById("swap-btn");
 const resultEl = document.getElementById("result");
 
@@ -632,7 +632,7 @@ if (knob) {
     
     if (roundedFreq !== currentFreq) {
       currentFreq = roundedFreq;
-      freqInput.value = currentFreq.toFixed(3);
+      standbyFreqEl.value = currentFreq.toFixed(3);
       showMessage("Frequency: " + currentFreq.toFixed(3));
     }
 
@@ -649,7 +649,7 @@ if (knob) {
     const steps = Math.round(totalRotation / degreesPerStep);
     const newFreq = 122.800 + (steps * freqIncrement);
     currentFreq = Math.round(newFreq * 1000) / 1000;
-    freqInput.value = currentFreq.toFixed(3);
+    standbyFreqEl.value = currentFreq.toFixed(3);
   }
 }
 
@@ -664,7 +664,7 @@ document.addEventListener("visibilitychange", () => {
 });
 
 swapBtn.addEventListener("click", async () => {
-  const inputFreq = freqInput.value.trim();
+  const inputFreq = standbyFreqEl.value.trim();
   
   if (!inputFreq) {
     showMessage("No standby frequency to swap.");
