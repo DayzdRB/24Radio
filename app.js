@@ -108,7 +108,7 @@ async function loadcontrollers() {
 
     controllers = data;
 
-    processControllerData();
+    
 
     console.log("Controllers loaded:", controllers);
 
