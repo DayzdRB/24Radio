@@ -274,7 +274,7 @@ function tuneFrequency(freq) {
 
   standby.value = currentFreq.toFixed(3);
 
-  const freqIncrement = 0.05;
+  const freqIncrement = 0.005;
   const degreesPerStep = 10;
 
   const steps = Math.round(
