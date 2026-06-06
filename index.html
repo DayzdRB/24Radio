@@ -39,6 +39,8 @@ h1 {
   padding: 20px;
   margin-top: 0;
   flex: 0 0 auto;
+
+   position: relative;
 }
 
 #active-freq {
@@ -232,6 +234,26 @@ h1 {
 .tune-btn:hover {
   background: #003300;
 }
+
+#step-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+
+  background: #000;
+  color: #0f0;
+  border: 2px solid #0f0;
+
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+#step-btn:hover {
+  background: #003300;
+}
 </style>
 </head>
 
@@ -264,6 +286,8 @@ h1 {
       <div class="knob-marker"></div>
     </div>
     <div class="knob-label">TUNE</div>
+
+    <button id="step-btn">STEP: 0.050</button>
   </div>
 
   <div id="result"></div>
