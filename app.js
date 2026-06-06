@@ -206,7 +206,7 @@ const resultEl = document.getElementById("result");
 function updateDisplay() {
   if(!activeFreqEl || !standbyFreqEl) return;
   activeFreqEl.textContent = activeFreq || "---";
-  standbyFreqEl.value = standbyFreq || "";
+  standbyFreqEl.value = standbyFreq || "---";
 }
 
 function renderFrequencyList(filteredList = frequencies) {
