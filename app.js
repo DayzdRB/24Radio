@@ -164,6 +164,7 @@ function processControllerData(){
   console.log("Processed controller status:", controllerStatus);
 }
 
+
 function getControllerDot(freqEntry){
 
   if(freqEntry.type === "ATIS"){
@@ -213,20 +214,48 @@ function renderFrequencyList(filteredList = frequencies) {
   const listEl = document.getElementById("frequency-list");
   listEl.innerHTML = "";
 
+  // 1. GROUP BY AREA
+  const grouped = {};
+
   filteredList.forEach(freq => {
-    const dotColor = getControllerDot(freq);
+    const area = freq.area || "UNKNOWN AREA";
 
-    const row = document.createElement("div");
-    row.className = "freq-item";
+    if (!grouped[area]) {
+      grouped[area] = [];
+    }
 
-    row.innerHTML = `
-      <span class="dot" style="color:${dotColor}">●</span>
-      <span class="freq">${freq.freq}</span>
-      <span class="name">${freq.name || ""}</span>
-      <span class="type">${freq.type}</span>
-    `;
+    grouped[area].push(freq);
+  });
 
-    listEl.appendChild(row);
+  // 2. SORT AREAS (optional but recommended)
+  const sortedAreas = Object.keys(grouped).sort();
+
+  // 3. RENDER
+  sortedAreas.forEach(area => {
+
+    // --- AREA HEADER ---
+    const header = document.createElement("div");
+    header.className = "area-header";
+    header.textContent = area;
+    listEl.appendChild(header);
+
+    // --- FREQUENCIES ---
+    grouped[area].forEach(freq => {
+      const dotColor = getControllerDot(freq);
+
+      const row = document.createElement("div");
+      row.className = "freq-item";
+
+      row.innerHTML = `
+        <span class="dot" style="color:${dotColor}">●</span>
+        <span class="freq">${freq.freq}</span>
+        <span class="name">${freq.name || ""}</span>
+        <span class="type">${freq.type}</span>
+      `;
+
+      listEl.appendChild(row);
+    });
+
   });
 }
 
