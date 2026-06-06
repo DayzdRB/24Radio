@@ -268,6 +268,11 @@ function showMessage(message) {
   resultEl.textContent = message;
 }
 
+function tuneFrequency(freq) {
+  const standby = document.getElementById("standby-freq");
+  standby.value = freq;
+}
+
 function isAtisEntry(entry){
 
   return (
