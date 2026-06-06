@@ -5,7 +5,7 @@ let activeFreq = null;
 let standbyFreq = null;
 let currentAtisLoop = null;
 let isAtisLooping = false;
-
+let GlobalfreqIncrement = 0.050;
 // ==== TTS VOICES & PRESETS ==== //
 let ttsVoices = [];
 let ttsPresets = [];
@@ -274,7 +274,7 @@ function tuneFrequency(freq) {
 
   standby.value = currentFreq.toFixed(3);
 
-  const freqIncrement = 0.005;
+  const freqIncrement = GlobalfreqIncrement;
   const degreesPerStep = 10;
 
   const steps = Math.round(
@@ -592,7 +592,7 @@ standbyFreqEl.addEventListener("input", (e) => {
   const typedFreq = parseFloat(e.target.value);
   if (!isNaN(typedFreq)) {
     currentFreq = Number(typedFreq.toFixed(3));
-    const freqIncrement = 0.005;
+    const freqIncrement = GlobalfreqIncrement;
     const degreesPerStep = 10;
     const steps = Math.round((typedFreq - 122.800) / freqIncrement);
     totalRotation = steps * degreesPerStep;
@@ -640,7 +640,7 @@ if (knob) {
 
   knob.style.transform = `rotate(${totalRotation}deg)`;
 
-  const freqIncrement = 0.005;
+  const freqIncrement = GlobalfreqIncrement;
   const degreesPerStep = 10;
 
   const steps = Math.round(totalRotation / degreesPerStep);
@@ -668,7 +668,7 @@ function endDrag() {
 
   knob.style.transform = `rotate(${totalRotation}deg)`;
 
-  const freqIncrement = 0.005;
+  const freqIncrement = GlobalfreqIncrement;
 
   const steps = Math.round(totalRotation / degreesPerStep);
 
