@@ -119,14 +119,42 @@ async function loadcontrollers() {
 
 
 
+function applyFilters() {
+  const searchValue = document.getElementById("search-bar").value.toLowerCase();
+  const areaFilter = document.getElementById("filter-area").value;
+  const airportFilter = document.getElementById("filter-airport").value;
+  const typeFilter = document.getElementById("filter-type").value;
 
+  const filtered = frequencies.filter(freq => {
+
+    const matchesSearch =
+      !searchValue ||
+      freq.name?.toLowerCase().includes(searchValue) ||
+      freq.airport?.toLowerCase().includes(searchValue) ||
+      freq.freq?.toLowerCase().includes(searchValue) ||
+      freq.area?.toLowerCase().includes(searchValue);
+
+    const matchesArea =
+      areaFilter === "all" || freq.area === areaFilter;
+
+    const matchesAirport =
+      airportFilter === "all" || freq.airport === airportFilter;
+
+    const matchesType =
+      typeFilter === "all" || freq.type === typeFilter;
+
+    return matchesSearch && matchesArea && matchesAirport && matchesType;
+  });
+
+  renderFrequencyList(filtered);
+}
 
 async function initializeApp(){
 
   await loadfrequencies();
   await loadcontrollers();
 
-  renderFrequencyList();
+  applyfilters();
 }
 window.addEventListener("DOMContentLoaded", initializeApp);
 
@@ -187,12 +215,22 @@ function getControllerDot(freqEntry){
   return controller.online ? "green" : "red";
 }
 
-
+// ===== DOM ELEMENTS =====
 
 const activeFreqEl = document.getElementById("active-freq");
 const standbyFreqEl = document.getElementById("standby-freq");
 const swapBtn = document.getElementById("swap-btn");
 const resultEl = document.getElementById("result");
+
+const searchBar = document.getElementById("search-bar");
+const areaFilter = document.getElementById("filter-area");
+const airportFilter = document.getElementById("filter-airport");
+const typeFilter = document.getElementById("filter-type");
+
+searchBar?.addEventListener("input", applyFilters);
+areaFilter?.addEventListener("change", applyFilters);
+airportFilter?.addEventListener("change", applyFilters);
+typeFilter?.addEventListener("change", applyFilters);
 
 function updateDisplay() {
   if(!activeFreqEl || !standbyFreqEl) return;
