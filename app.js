@@ -572,7 +572,7 @@ let currentFreq = 122.800;
 
 standbyFreqEl.value = currentFreq.toFixed(3);
 
-StandbyFreqEl.addEventListener("input", (e) => {
+standbyFreqEl.addEventListener("input", (e) => {
   const typedFreq = parseFloat(e.target.value);
   if (!isNaN(typedFreq)) {
     currentFreq = typedFreq;
