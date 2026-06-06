@@ -155,12 +155,13 @@ function applyFilters() {
   renderFrequencyList(filtered);
 }
 
-async function initializeApp(){
-
+async function initializeApp() {
   await loadfrequencies();
   await loadcontrollers();
 
-  applyFilters();
+  processControllerData();   // MUST happen before UI render
+
+  applyFilters();            // this will call renderFrequencyList internally
 }
 window.addEventListener("DOMContentLoaded", initializeApp);
 
