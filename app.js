@@ -661,7 +661,7 @@ standbyFreqEl.value = currentFreq.toFixed(3);
 standbyFreqEl.addEventListener("input", (e) => {
   const typedFreq = parseFloat(e.target.value);
   if (!isNaN(typedFreq)) {
-    currentFreq = Number(typedFreq.toFixed(3));
+    currentFreq = typedFreq;
     const freqIncrement = GlobalfreqIncrement;
     const degreesPerStep = 10;
     const steps = Math.round((typedFreq - 122.800) / freqIncrement);
@@ -705,23 +705,32 @@ if (knob) {
   if (deltaAngle > Math.PI) deltaAngle -= 2 * Math.PI;
   if (deltaAngle < -Math.PI) deltaAngle += 2 * Math.PI;
 
-  let deltaDegrees = deltaAngle * (180 / Math.PI);
-  totalRotation += deltaDegrees;
+    const freqIncrement = GlobalfreqIncrement;
+    const degreesPerStep = 10;
+    const steps = Math.round(totalRotation / degreesPerStep);
+    
+    const newFreq = 122.800 + (steps * freqIncrement);
+    const roundedFreq = Math.round(newFreq * 1000) / 1000;
+    
+    if (roundedFreq !== currentFreq) {
+      currentFreq = roundedFreq;
+      freqInput.value = currentFreq.toFixed(3);
+      showMessage("Frequency: " + currentFreq.toFixed(3));
+    }
 
   knob.style.transform = `rotate(${totalRotation}deg)`;
 
-  const freqIncrement = GlobalfreqIncrement;
-  const degreesPerStep = 10;
-
-  const steps = Math.round(totalRotation / degreesPerStep);
-
-  const newFreq = 122.800 + (steps * freqIncrement);
-  const roundedFreq = Number(newFreq.toFixed(3));
-
-  if (roundedFreq !== currentFreq) {
-    currentFreq = roundedFreq;
-    standbyFreqEl.value = currentFreq.toFixed(3);
-    showMessage("Frequency: " + currentFreq.toFixed(3));
+  function endDrag() {
+    isDragging = false;
+    const degreesPerStep = 10;
+    totalRotation = Math.round(totalRotation / degreesPerStep) * degreesPerStep;
+    knob.style.transform = `rotate(${totalRotation}deg)`;
+    
+    const freqIncrement = GlobalfreqIncrement;
+    const steps = Math.round(totalRotation / degreesPerStep);
+    const newFreq = 122.800 + (steps * freqIncrement);
+    currentFreq = Math.round(newFreq * 1000) / 1000;
+    freqInput.value = currentFreq.toFixed(3);
   }
 
   startAngle = angle;
