@@ -919,10 +919,11 @@ function parseAtis(raw) {
   }
 
   // Runways
-  const depSeg = text.match(/\bDEP(?:ARTURE)?\s+(?:RWY|RUNWAY)?\s*((?:\d{2}[LRC]?[\s,\/]*(?:AND[\s,\/]*)?)+)/);
-  const arrSeg = text.match(/\bARR(?:IVAL)?\s+(?:RWY|RUNWAY)?\s*((?:\d{2}[LRC]?[\s,\/]*(?:AND[\s,\/]*)?)+)/);
-  out.depRwy = depSeg ? (depSeg[1].match(/\d{2}[LRC]?/g) || []) : [];
-  out.arrRwy = arrSeg ? (arrSeg[1].match(/\d{2}[LRC]?/g) || []) : [];
+  const rwyTokens = seg => (seg ? (seg[1].match(/\d{1,2}[LRC]?/g) || []) : []);
+  const depSeg = text.match(/\bDEP(?:ARTURE)?\s+RWY\s+((?:\d{1,2}[LRC]?\s*)+)/);
+  const arrSeg = text.match(/\bARR(?:IVAL)?\s+RWY\s+((?:\d{1,2}[LRC]?\s*)+)/);
+  out.depRwy = rwyTokens(depSeg);
+  out.arrRwy = rwyTokens(arrSeg);
 
   return out;
 }
