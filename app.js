@@ -740,7 +740,7 @@ if (knob) {
   });
 }
 
-}
+
 
 window.addEventListener("beforeunload", () => {
   stopAtisLoop();
