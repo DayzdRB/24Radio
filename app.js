@@ -339,6 +339,11 @@ function tuneFrequency(freq) {
 
   standby.value = currentFreq.toFixed(3);
 
+  // Force step to 0.005 so any frequency can be reached
+  GlobalfreqIncrement = 0.005;
+  const stepBtn = document.getElementById("step-btn");
+  if (stepBtn) stepBtn.textContent = "STEP: 0.005";
+
   const freqIncrement = GlobalfreqIncrement;
   const degreesPerStep = 10;
 
