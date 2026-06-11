@@ -766,6 +766,7 @@ if (swapBtn) {
     console.log("Standby Entry Name:", standbyEntry?.name);
 
     stopAtisLoop();
+    clearAtisVisual();
 
     // Swap active and standby
     const temp = activeFreq;
@@ -800,12 +801,13 @@ if (swapBtn) {
         const allAtis = await fetchAllAtis();
         const atis = getAtisForAirport(allAtis, airport);
 
-        if (atis) {
+         if (atis) {
           speakAtisLoop(
             airport,
             atis,
             standbyEntry.name
           );
+          renderAtisVisual(airport, atis.content, standbyEntry.name);
         } else {
           showMessage(
             standbyEntry.name + " - ATIS not found"
@@ -847,3 +849,178 @@ window.addEventListener("DOMContentLoaded", () => {
     stepBtn.textContent = `STEP: ${GlobalfreqIncrement.toFixed(3)}`;
   });
 });
+
+
+// ==== ATIS VISUAL PANEL ==== //
+// Parses raw ATIS content into structured fields and renders the panel.
+// Public functions: renderAtisVisual(station, content, infoName), clearAtisVisual()
+
+function parseAtis(raw) {
+  const out = {
+    info: null, time: null,
+    windDir: null, windSpd: null, windGust: null, windVrb: false, calm: false,
+    vis: null, cavok: false,
+    clouds: [], temp: null, dew: null, qnh: null,
+    depRwy: [], arrRwy: []
+  };
+  if (!raw) return out;
+
+  const text = " " + String(raw).toUpperCase() + " ";
+  let m;
+
+  // INFO letter
+  m = text.match(/\bINFO(?:RMATION)?\s+([A-Z])\b/);
+  if (m) out.info = m[1];
+
+  // Zulu time (e.g. 1230Z)
+  m = text.match(/\b(\d{3,4})\s*Z\b/);
+  if (m) out.time = m[1].padStart(4, "0");
+
+  // CAVOK
+  if (/\bCAVOK\b/.test(text)) out.cavok = true;
+
+  // Wind: 240/08, 240/08G25, VRB/03, 00000
+  m = text.match(/\b(\d{3}|VRB)\/(\d{2,3})(?:G(\d{2,3}))?\b/);
+  if (m) {
+    if (m[1] === "VRB") out.windVrb = true;
+    else out.windDir = parseInt(m[1], 10);
+    out.windSpd = parseInt(m[2], 10);
+    if (m[3]) out.windGust = parseInt(m[3], 10);
+    if (out.windSpd === 0) out.calm = true;
+  }
+
+  // Clouds: FEW/SCT/BKN/OVC + height (hundreds of feet), optional CB/TCU
+  const cloudRe = /\b(FEW|SCT|BKN|OVC)(\d{2,3})(CB|TCU)?\b/g;
+  let c;
+  while ((c = cloudRe.exec(text)) !== null) {
+    out.clouds.push({ cover: c[1], ft: parseInt(c[2], 10) * 100, suffix: c[3] || "" });
+  }
+
+  // Temp / dew: 15/10, M02/M05
+  m = text.match(/\b(M?\d{2})\/(M?\d{2})\b/);
+  if (m) {
+    const conv = s => s.startsWith("M") ? -parseInt(s.slice(1), 10) : parseInt(s, 10);
+    out.temp = conv(m[1]);
+    out.dew = conv(m[2]);
+  }
+
+  // QNH: Q1013 or QNH 1013
+  m = text.match(/\bQ(?:NH)?\s*(\d{4})\b/);
+  if (m) out.qnh = parseInt(m[1], 10);
+
+  // Visibility: a standalone 4-digit group that isn't time (…Z) or QNH (Q…)
+  if (!out.cavok) {
+    const hits = [...text.matchAll(/\b(\d{4})\b/g)].filter(x => {
+      const after = text.slice(x.index + 4, x.index + 6);
+      const before = text.slice(Math.max(0, x.index - 1), x.index);
+      return !/^\s*Z/.test(after) && before !== "Q";
+    });
+    if (hits.length) out.vis = parseInt(hits[0][1], 10);
+  }
+
+  // Runways
+  let r;
+  const depRe = /\bDEP(?:ARTURE)?\s+(?:RWY|RUNWAY)?\s*(\d{2}[LRC]?)/g;
+  const arrRe = /\bARR(?:IVAL)?\s+(?:RWY|RUNWAY)?\s*(\d{2}[LRC]?)/g;
+  while ((r = depRe.exec(text)) !== null) out.depRwy.push(r[1]);
+  while ((r = arrRe.exec(text)) !== null) out.arrRwy.push(r[1]);
+
+  return out;
+}
+
+function fmtVis(v) {
+  if (v == null) return "—";
+  if (v >= 9999) return "10 km+";
+  if (v >= 1000) return (v / 1000) + " km";
+  return v + " m";
+}
+
+function buildCompass(d) {
+  const cx = 48, cy = 48, R = 38;
+  let needle = "";
+  let center = "";
+
+  if (d.calm) {
+    center = `<text x="${cx}" y="${cy}" class="cmp-c">CALM</text>`;
+  } else if (d.windVrb) {
+    center = `<text x="${cx}" y="${cy}" class="cmp-c">VRB</text>`;
+  } else if (d.windDir != null) {
+    // Arrow drawn pointing down (wind FROM north); rotate by bearing.
+    needle = `<g transform="rotate(${d.windDir} ${cx} ${cy})">
+        <line x1="${cx}" y1="14" x2="${cx}" y2="70" stroke="var(--cyan)" stroke-width="3" stroke-linecap="round"/>
+        <polygon points="${cx - 6},66 ${cx + 6},66 ${cx},80" fill="var(--cyan)"/>
+      </g>`;
+  }
+
+  return `<svg viewBox="0 0 96 96" class="cmp" aria-hidden="true">
+    <circle cx="${cx}" cy="${cy}" r="${R}" class="cmp-ring"/>
+    <text x="${cx}" y="9"  class="cmp-l">N</text>
+    <text x="89" y="${cy}" class="cmp-l">E</text>
+    <text x="${cx}" y="90" class="cmp-l">S</text>
+    <text x="7"  y="${cy}" class="cmp-l">W</text>
+    ${needle}
+    <circle cx="${cx}" cy="${cy}" r="2.5" class="cmp-dot"/>
+    ${center}
+  </svg>`;
+}
+
+function setAtisField(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+function renderAtisVisual(station, content, infoName) {
+  const panel = document.getElementById("atis-panel");
+  if (!panel) return;
+
+  const d = parseAtis(content);
+
+  setAtisField("atis-station", station || "----");
+  setAtisField("atis-info", d.info || "–");
+
+  // Wind
+  document.getElementById("atis-compass").innerHTML = buildCompass(d);
+  const dirEl = document.getElementById("atis-wind-dir");
+  const spdEl = document.getElementById("atis-wind-spd");
+  if (d.calm) {
+    dirEl.textContent = "CALM"; spdEl.textContent = "";
+  } else if (d.windVrb) {
+    dirEl.textContent = "VRB"; spdEl.textContent = (d.windSpd ?? "--") + " kt";
+  } else if (d.windDir != null) {
+    dirEl.textContent = String(d.windDir).padStart(3, "0") + "°";
+    spdEl.textContent = (d.windSpd ?? "--") + " kt" + (d.windGust ? " G" + d.windGust : "");
+  } else {
+    dirEl.textContent = "---"; spdEl.textContent = "-- kt";
+  }
+
+  // Tiles
+  setAtisField("atis-vis", d.cavok ? "CAVOK" : fmtVis(d.vis));
+  setAtisField("atis-qnh", d.qnh != null ? d.qnh : "—");
+  setAtisField("atis-temp", d.temp != null ? `${d.temp}° / ${d.dew}°` : "—");
+  setAtisField("atis-clouds",
+    d.clouds.length
+      ? d.clouds.map(c => `${c.cover} ${String(c.ft / 100).padStart(3, "0")}${c.suffix ? " " + c.suffix : ""}`).join("   ")
+      : (d.cavok ? "NIL" : "—")
+  );
+
+  // Runways
+  const rwyWrap = document.getElementById("atis-rwy");
+  const chipRow = (label, arr) =>
+    (!arr || !arr.length) ? "" :
+    `<div class="rwy-row"><span class="rwy-label">${label}</span>` +
+    arr.map(x => `<span class="rwy-chip">${x}</span>`).join("") + `</div>`;
+  rwyWrap.innerHTML = chipRow("DEP", d.depRwy) + chipRow("ARR", d.arrRwy);
+
+  // Time
+  setAtisField("atis-time", d.time ? d.time + "Z" : "");
+
+  document.getElementById("atis-empty").hidden = true;
+  document.getElementById("atis-body").hidden = false;
+}
+
+function clearAtisVisual() {
+  const body = document.getElementById("atis-body");
+  const empty = document.getElementById("atis-empty");
+  if (body) body.hidden = true;
+  if (empty) empty.hidden = false;
+}
