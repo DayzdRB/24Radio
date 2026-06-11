@@ -1,326 +1,459 @@
 [
-{ 
-  "name": "IRCC",
-  "freq": "124.850",
-  "channelID": "1409259489580023898"
-},
+  {
+    "area": "Rockford",
+    "airport": "IRCC",
+    "name": "IRCC",
+    "type": "CENTER",
+    "freq": "124.850"
+  },
 
-{
-  "name": "IRFD_TWR",
-  "freq": "118.100",
-  "channelID": "1409259574162358292"
-},
+  {
+    "area": "Rockford",
+    "airport": "IRFD",
+    "name": "IRFD_TWR",
+    "type": "TWR",
+    "freq": "118.100"
+  },
 
-{
-  "name": "IRFD_GND",
-  "freq": "120.400",
-  "channelID": "1409259635285688474"
-},
+  {
+    "area": "Rockford",
+    "airport": "IRFD",
+    "name": "IRFD_GND",
+    "type": "GND",
+    "freq": "120.400"
+  },
 
-{
-  "name": "IMLR_TWR",
-  "freq": "133.850",
-  "channelID": "1409259671096791110"
-},
+  {
+    "area": "Rockford",
+    "airport": "IMLR",
+    "name": "IMLR_TWR",
+    "type": "TWR",
+    "freq": "133.850"
+  },
 
-{
-  "name": "IGAR_TWR",
-  "freq": "125.600",
-  "channelID": "1409259714193129655"
-},
+  {
+    "area": "Rockford",
+    "airport": "IGAR",
+    "name": "IGAR_TWR",
+    "type": "TWR",
+    "freq": "125.600"
+  },
 
-{
-  "name": "IBLT_TWR",
-  "freq": "120.250",
-  "channelID": "1409260318441603112"
-},
+  {
+    "area": "Rockford",
+    "airport": "IBLT",
+    "name": "IBLT_TWR",
+    "type": "TWR",
+    "freq": "120.250"
+  },
 
-{
-  "name": "ITRC_TWR",
-  "freq": "119.150",
-  "channelID": "1409260436020527266"
-},
+  {
+    "area": "Rockford",
+    "airport": "ITRC",
+    "name": "ITRC_TWR",
+    "type": "TWR",
+    "freq": "119.150"
+  },
 
-{
-  "name": "ICCC",
-  "freq": "126.300",
-  "channelID": "1409260679193694320"
-},
+  {
+    "area": "Rockford",
+    "airport": "IRFD",
+    "name": "IRFD_ATIS",
+    "type": "ATIS",
+    "freq": "127.600"
+  },
 
-{
-  "name": "ILAR_TWR",
-  "freq": "121.200",
-  "channelID": "1409260714610135243"
-},
+  {
+    "area": "Rockford",
+    "airport": "IMLR",
+    "name": "IMLR_ATIS",
+    "type": "ATIS",
+    "freq": "126.030"
+  },
 
-{
-  "name": "ILAR_GND",
-  "freq": "119.400",
-  "channelID": "1409260740787048520"
-},
+  {
+    "area": "Rockford",
+    "airport": "IGAR",
+    "name": "IGAR_ATIS",
+    "type": "ATIS",
+    "freq": "125.700"
+  },
 
-{
-  "name": "IPAP_TWR",
-  "freq": "119.900",
-  "channelID": "1409260770113355776"
-},
+  {
+    "area": "Rockford",
+    "airport": "ITRC",
+    "name": "ITRC_ATIS",
+    "type": "ATIS",
+    "freq": "132.075"
+  },
 
-{
-  "name": "IIAB_TWR",
-  "freq": "127.250",
-  "channelID": "1409260797871526039"
-},
+  {
+    "area": "Rockford",
+    "airport": "IBLT",
+    "name": "IBLT_ATIS",
+    "type": "ATIS",
+    "freq": "122.725"
+  },
 
-{
-  "name": "IHEN_TWR",
-  "freq": "130.250",
-  "channelID": "1409260822940881098"
-},
+  {
+    "area": "Cyprus",
+    "airport": "ICCC",
+    "name": "ICCC",
+    "type": "CENTER",
+    "freq": "126.300"
+  },
 
-{
-  "name": "IBAR_TWR",
-  "freq": "118.750",
-  "channelID": "1409260849344024697"
-},
+  {
+    "area": "Cyprus",
+    "airport": "ILAR",
+    "name": "ILAR_TWR",
+    "type": "TWR",
+    "freq": "121.200"
+  },
 
-{
-  "name": "IZCC",
-  "freq": "125.650",
-  "channelID": "1409260891442118877"
-},
+  {
+    "area": "Cyprus",
+    "airport": "ILAR",
+    "name": "ILAR_GND",
+    "type": "GND",
+    "freq": "119.400"
+  },
 
-{
-  "name": "IZOL_TWR",
-  "freq": "118.700",
-  "channelID": "1409260919220863169"
-},
+  {
+    "area": "Cyprus",
+    "airport": "IPAP",
+    "name": "IPAP_TWR",
+    "type": "TWR",
+    "freq": "119.900"
+  },
 
-{
-  "name": "IZOL_GND",
-  "freq": "121.900",
-  "channelID": "1409260950791393381"
-},
+  {
+    "area": "Cyprus",
+    "airport": "IIAB",
+    "name": "IIAB_TWR",
+    "type": "TWR",
+    "freq": "127.250"
+  },
 
-{
-  "name": "IJAF_TWR",
-  "freq": "119.100",
-  "channelID": "1409260976364326932"
-},
+  {
+    "area": "Cyprus",
+    "airport": "IHEN",
+    "name": "IHEN_TWR",
+    "type": "TWR",
+    "freq": "130.250"
+  },
 
-{
-  "name": "ISCM_TWR",
-  "freq": "121.300",
-  "channelID": "1409261001442070540"
-},
+  {
+    "area": "Cyprus",
+    "airport": "IBAR",
+    "name": "IBAR_TWR",
+    "type": "TWR",
+    "freq": "118.750"
+  },
 
-{
-  "name": "IOCC",
-  "freq": "132.300",
-  "channelID": "1409261074146005151"
-},
+  {
+    "area": "Cyprus",
+    "airport": "ILAR",
+    "name": "ILAR_ATIS",
+    "type": "ATIS",
+    "freq": "126.550"
+  },
 
-{
-  "name": "ITKO_TWR",
-  "freq": "118.800",
-  "channelID": "1409261115950497882"
-},
+  {
+    "area": "Cyprus",
+    "airport": "IPAP",
+    "name": "IPAP_ATIS",
+    "type": "ATIS",
+    "freq": "127.325"
+  },
 
-{
-  "name": "ITKO_GND",
-  "freq": "118.225",
-  "channelID": "1409261183877255199"
-},
+  {
+    "area": "Cyprus",
+    "airport": "IIAB",
+    "name": "IIAB_ATIS",
+    "type": "ATIS",
+    "freq": "124.650"
+  },
 
+  {
+    "area": "Cyprus",
+    "airport": "IBAR",
+    "name": "IBAR_ATIS",
+    "type": "ATIS",
+    "freq": "118.080"
+  },
 
+  {
+    "area": "Cyprus",
+    "airport": "IHEN",
+    "name": "IHEN_ATIS",
+    "type": "ATIS",
+    "freq": "130.255"
+  },
 
-{
-  "name": "IBRD_TWR",
-  "freq": "118.350",
-  "channelID": "1444058256052846674"
-},
+   {
+    "area": "Izolirani",
+    "airport": "IZCC",
+    "name": "IZCC",
+    "type": "CENTER",
+    "freq": "125.650"
+  },
 
-{
-  "name": "IPCC",
-  "freq": "135.250",
-  "channelID": "1409261040360755331"
-},
+  {
+    "area": "Izolirani",
+    "airport": "IZOL",
+    "name": "IZOL_TWR",
+    "type": "TWR",
+    "freq": "118.700"
+  },
 
-{
-  "name": "IPPH_TWR",
-  "freq": "127.400",
-  "channelID": "1409261095780089917"
-},
+  {
+    "area": "Izolirani",
+    "airport": "IZOL",
+    "name": "IZOL_GND",
+    "type": "GND",
+    "freq": "121.900"
+  },
 
-{
-  "name": "IPPH_GND",
-  "freq": "121.700",
-  "channelID": "1409261121096912936"
-},
+  {
+    "area": "Izolirani",
+    "airport": "IJAF",
+    "name": "IJAF_TWR",
+    "type": "TWR",
+    "freq": "119.100"
+  },
 
-{
-  "name": "ILKL_TWR",
-  "freq": "120.150",
-  "channelID": "1409261144413048922"
-},
+  {
+    "area": "Izolirani",
+    "airport": "ISCM",
+    "name": "ISCM_TWR",
+    "type": "TWR",
+    "freq": "121.300"
+  },
 
-{
-  "name": "IBCC",
-  "freq": "128.600",
-  "channelID": "1409260864716144660"
-},
+  {
+    "area": "Izolirani",
+    "airport": "IZOL",
+    "name": "IZOL_ATIS",
+    "type": "ATIS",
+    "freq": "124.300"
+  },
 
-{
-  "name": "IBTH_TWR",
-  "freq": "118.700",
-  "channelID": "1409260903232180277"
-},
+  {
+    "area": "Izolirani",
+    "airport": "IJAF",
+    "name": "IJAF_ATIS",
+    "type": "ATIS",
+    "freq": "123.900"
+  },
 
-{
-  "name": "ISKP_TWR",
-  "freq": "123.250",
-  "channelID": "1409260942658895942"
-},
+  {
+    "area": "Izolirani",
+    "airport": "ISCM",
+    "name": "ISCM_ATIS",
+    "type": "ATIS",
+    "freq": "119.200"
+  },
 
-{
-  "name": "IGCC",
-  "freq": "126.750",
-  "channelID": "1409260603884961913"
-},
+  {
+    "area": "Orenji",
+    "airport": "IOCC",
+    "name": "IOCC",
+    "type": "CENTER",
+    "freq": "132.300"
+  },
+  {
+    "area": "Orenji",
+    "airport": "ITKO",
+    "name": "ITKO_TWR",
+    "type": "TWR",
+    "freq": "118.800"
+  },
+  {
+    "area": "Orenji",
+    "airport": "ITKO",
+    "name": "ITKO_GND",
+    "type": "GND",
+    "freq": "118.225"
+  },
+  {
+    "area": "Orenji",
+    "airport": "IBRD",
+    "name": "IBRD_TWR",
+    "type": "TWR",
+    "freq": "118.350"
+  },
+  {
+    "area": "Orenji",
+    "airport": "IDCS",
+    "name": "IDCS_TWR",
+    "type": "TWR",
+    "freq": "118.250"
+  },
+  {
+    "area": "Orenji",
+    "airport": "ITKO",
+    "name": "ITKO_ATIS",
+    "type": "ATIS",
+    "freq": "128.800"
+  },
+  {
+    "area": "Orenji",
+    "airport": "IDCS",
+    "name": "IDCS_ATIS",
+    "type": "ATIS",
+    "freq": "118.260"
+  },
+  {
+    "area": "Orenji",
+    "airport": "IBRD",
+    "name": "IBRD_ATIS",
+    "type": "ATIS",
+    "freq": "131.600"
+  },
 
-{
-  "name": "IKFL_TWR",
-  "freq": "118.300",
-  "channelID": "1494492452587831448"
-},
+    {
+    "area": "Perth",
+    "airport": "IPCC",
+    "name": "IPCC",
+    "type": "CENTER",
+    "freq": "135.250"
+  },
+  {
+    "area": "Perth",
+    "airport": "IPPH",
+    "name": "IPPH_TWR",
+    "type": "TWR",
+    "freq": "127.400"
+  },
+  {
+    "area": "Perth",
+    "airport": "IPPH",
+    "name": "IPPH_GND",
+    "type": "GND",
+    "freq": "121.700"
+  },
+  {
+    "area": "Perth",
+    "airport": "ILKL",
+    "name": "ILKL_TWR",
+    "type": "TWR",
+    "freq": "120.150"
+  },
+  {
+    "area": "Perth",
+    "airport": "IPPH",
+    "name": "IPPH_ATIS",
+    "type": "ATIS",
+    "freq": "123.800"
+  },
+  {
+    "area": "Perth",
+    "airport": "ILKL",
+    "name": "ILKL_ATIS",
+    "type": "ATIS",
+    "freq": "122.300"
+  },
 
-{
-  "name": "IKFL_GND",
-  "freq": "121.750",
-  "channelID": "1494510227859701830"
-},
+    {
+    "area": "Saint Barthelemy",
+    "airport": "IBCC",
+    "name": "IBCC",
+    "type": "CENTER",
+    "freq": "128.600"
+  },
+  {
+    "area": "Saint Barthelemy",
+    "airport": "IBTH",
+    "name": "IBTH_TWR",
+    "type": "TWR",
+    "freq": "118.700"
+  },
+  {
+    "area": "Saint Barthelemy",
+    "airport": "ISKP",
+    "name": "ISKP_TWR",
+    "type": "TWR",
+    "freq": "123.250"
+  },
+  {
+    "area": "Saint Barthelemy",
+    "airport": "IBTH",
+    "name": "IBTH_ATIS",
+    "type": "ATIS",
+    "freq": "118.450"
+  },
+  {
+    "area": "Saint Barthelemy",
+    "airport": "ISKP",
+    "name": "ISKP_ATIS",
+    "type": "ATIS",
+    "freq": "124.200"
+  },
 
-{
-  "name": "ITEY_TWR",
-  "freq": "119.425",
-  "channelID": "1494511321847431221"
-},
+   {
+   "area": "Grindavik",
+   "airport": "IGCC",
+   "name": "IGCC",
+   "type": "CENTER",
+   "freq": "126.750"
+ },
+ {
+   "area": "Grindavik",
+   "airport": "IKFL",
+   "name": "IKFL_TWR",
+   "type": "TWR",
+   "freq": "118.300"
+ },
+ {
+   "area": "Grindavik",
+   "airport": "IKFL",
+   "name": "IKFL_GND",
+   "type": "GND",
+   "freq": "121.750"
+ },
+ {
+   "area": "Grindavik",
+   "airport": "ITEY",
+   "name": "ITEY_TWR",
+   "type": "TWR",
+   "freq": "119.425"
+ },
+ {
+   "area": "Grindavik",
+   "airport": "IKFL",
+   "name": "IKFL_ATIS",
+   "type": "ATIS",
+   "freq": "128.300"
+ },
+ {
+   "area": "Grindavik",
+   "airport": "ITEY",
+   "name": "ITEY_ATIS",
+   "type": "ATIS",
+   "freq": "119.100"
+ },
 
-{
-  "name": "ISCC",
-  "freq": "127.825",
-  "channelID": "1409260557097238538"
-},
-
-{
-  "name": "ISAU_TWR",
-  "freq": "118.200",
-  "channelID": "1409260523018522704"
-},
-{
-  "name": "IBTH_ATIS",
-  "freq": "118.450"
-},
-  
-{
-  "name": "IIAB_ATIS",
-  "freq": "124.650"
-},
-
-{
-  "name": "ILAR_ATIS",
-  "freq": "126.550"
-},
-
-{
-  "name": "IMLR_ATIS",
-  "freq": "126.030"
-},
-  
-{
-  "name": "IPAP_ATIS",
-  "freq": "127.325"
-},
-
-{
-  "name": "IPPH_ATIS",
-  "freq": "123.800"
-},
-
-{
-  "name": "IRFD_ATIS",
-  "freq": "127.600"
-},
-
-{
-  "name": "ISAU_ATIS",
-  "freq": "113.350"
-},
-{
-  "name": "ITKO_ATIS",
-  "freq": "128.800"
-},
-
-{
-  "name": "IKFL_ATIS",
-  "freq": "128.300"
-},
-
-{
-  "name": "IBAR_ATIS",
-  "freq": "118.080"
-},
-{
-  "name": "IBRD_ATIS",
-  "freq": "131.600"
-},
-
-{
-  "name": "IHEN_ATIS",
-  "freq": "130.255"
-},
-
-{
-  "name": "IJAF_ATIS",
-  "freq": "123.900"
-},
-
-{
-  "name": "ILKL_ATIS",
-  "freq": "122.300"
-},
-
-{
-  "name": "ISCM_ATIS",
-  "freq": "119.200"
-},
-
-{
-  "name": "ISKP_ATIS",
-  "freq": "124.200"
-},
-
-{
-  "name": "ITEY_ATIS",
-  "freq": "119.100"
-},
-
-{
-  "name": "IZOL_ATIS",
-  "freq": "124.300"
-},
-
-{
-  "name": "IDCS_ATIS",
-  "freq": "118.250"
-},
-
-{
-  "name": "ITRC_ATIS",
-  "freq": "132.075"
-},
-
-{
-  "name": "IBLT_ATIS",
-  "freq": "122.725"
-}
+  {
+    "area": "Sauthemptona",
+    "airport": "ISCC",
+    "name": "ISCC",
+    "type": "CENTER",
+    "freq": "127.825"
+  },
+  {
+    "area": "Sauthemptona",
+    "airport": "ISAU",
+    "name": "ISAU_TWR",
+    "type": "TWR",
+    "freq": "118.200"
+  },
+  {
+    "area": "Sauthemptona",
+    "airport": "ISAU",
+    "name": "ISAU_ATIS",
+    "type": "ATIS",
+    "freq": "113.350"
+  }
 ]
+

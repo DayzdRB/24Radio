@@ -1,179 +1,331 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="Favicon.png">
-  <title>24Radio - ATC24 Radio Client</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="Favicon.png">
+<title>24Radio - ATC24 Radio Client</title>
 
-  <style>
-    body {
-      background: #111;
-      color: #0f0;
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
+<style>
+body {
+  margin: 0;
+  background: #111;
+  color: #0f0;
+  font-family: Arial, sans-serif;
+}
 
-    #radio-panel {
-      background: #222;
-      border: 3px solid #0f0;
-      border-radius: 8px;
-      display: inline-block;
-      padding: 20px;
-      margin-top: 20px;
-    }
+h1 {
+  text-align: center;
+  margin: 15px 0;
+}
 
-    #active-freq {
-      font-size: 20px;
-      font-family: "Courier New", monospace;
-      background: #000;
-      border: 2px solid #0f0;
-      padding: 8px 16px;
-      display: inline-block;
-      min-width: 120px;
-    }
+.main-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 20px;
+  padding: 10px;
+  flex-wrap: wrap;
+}
 
-    #standby-freq {
-      background: #000;
-      color: #0f0;
-      border: 2px solid #0f0;
-      padding: 8px 16px;
-      font-size: 20px;
-      font-family: "Courier New", monospace;
-      min-width: 120px;
-      text-align: center;
-      outline: none;
-    }
+/* =========================
+   RADIO PANEL (UNCHANGED)
+========================= */
+#radio-panel {
+  background: #222;
+  border: 3px solid #0f0;
+  border-radius: 8px;
+  display: inline-block;
+  padding: 20px;
+  margin-top: 0;
+  flex: 0 0 auto;
 
-    #standby-freq:focus {
-      border-color: #0ff;
-      box-shadow: 0 0 10px #0ff;
-    }
+   position: relative;
+}
 
-    #swap-btn {
-      background: #000;
-      color: #0f0;
-      border: 2px solid #0f0;
-      padding: 8px 16px;
-      font-size: 20px;
-      font-family: "Courier New", monospace;
-      cursor: pointer;
-      min-width: 120px;
-    }
+#active-freq {
+  font-size: 20px;
+  font-family: "Courier New", monospace;
+  background: #000;
+  border: 2px solid #0f0;
+  padding: 8px 16px;
+  display: inline-block;
+  width: 160px;
+  text-align: center;
+}
 
-    #swap-btn:hover {
-      background: #003300;
-    }
+#standby-freq {
+  background: #000;
+  color: #0f0;
+  border: 2px solid #0f0;
+  padding: 8px 16px;
+  font-size: 20px;
+  font-family: "Courier New", monospace;
+  width: 160px;
+  text-align: center;
+  outline: none;
+}
 
-    #result {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #8f8;
-    }
+#swap-btn {
+  background: #000;
+  color: #0f0;
+  border: 2px solid #0f0;
 
-    .knob-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      margin: 15px;
-      user-select: none;
-    }
+  padding: 8px 16px;
+  font-size: 20px;
+  font-family: "Courier New", monospace;
+  cursor: pointer;
 
-    .knob {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: #000;
-      border: 3px solid #0f0;
-      box-shadow: 
-        5px 5px 10px #0d0d0d,
-        -5px -5px 10px #333;
-      position: relative;
-      cursor: grab;
-      transition: transform 0.1s ease;
-    }
+  width: 160px;
+  height: 46px;
 
-    .knob:active {
-      cursor: grabbing;
-    }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-    .knob-marker {
-      width: 8px;
-      height: 20px;
-      background: #0f0;
-      position: absolute;
-      top: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      border-radius: 2px;
-      box-shadow: 0 0 10px #0f0;
-    }
+#swap-btn:hover {
+  background: #003300;
+}
 
-    .knob-label {
-      margin-top: 12px;
-      color: #0f0;
-      font-family: "Courier New", monospace;
-      font-size: 14px;
-      font-weight: bold;
-      text-shadow: 0 0 5px #0f0;
-    }
+.freq-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
 
-    .freq-row {
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      gap: 15px;
-      margin-bottom: 15px;
-    }
+.freq-box-wrapper,
+.swap-box-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
 
-    .freq-box-wrapper {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-    }
+/* KNOB */
+.knob-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 15px;
+  user-select: none;
+}
 
-    .freq-label {
-      font-size: 12px;
-      color: #0f0;
-      margin-bottom: 5px;
-    }
+.knob {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #000;
+  border: 3px solid #0f0;
+  position: relative;
+  cursor: grab;
+}
 
-    .swap-box-wrapper {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-    }
-  </style>
+.knob-marker {
+  width: 8px;
+  height: 20px;
+  background: #0f0;
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.knob-label {
+  margin-top: 12px;
+  color: #0f0;
+  font-family: "Courier New", monospace;
+  font-size: 14px;
+}
+
+/* =========================
+   CONTROLLER PANEL
+========================= */
+#controller-panel {
+  background: #222;
+  border: 3px solid #0f0;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 900px;
+  padding: 15px;
+  flex: 1;
+  min-width: 400px;
+}
+
+.panel-title {
+  color: #0f0;
+  font-family: "Courier New", monospace;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.controller-toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.controller-toolbar input,
+.controller-toolbar select {
+  background: #000;
+  color: #0f0;
+  border: 2px solid #0f0;
+  padding: 6px;
+  font-family: "Courier New", monospace;
+}
+
+#frequency-list {
+  margin-top: 10px;
+  padding: 10px;
+  background: #111;
+  border: 2px solid #0f0;
+  border-radius: 6px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+/* =========================
+   FREQUENCY ROW + TUNE BUTTON
+========================= */
+.area-header {
+  margin-top: 10px;
+  padding: 6px;
+  background: #000;
+  border-left: 3px solid #0f0;
+  font-weight: bold;
+  font-family: "Courier New", monospace;
+}
+
+.freq-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  border-bottom: 1px solid #0a0;
+  font-family: "Courier New", monospace;
+}
+
+.freq-left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex: 1;
+}
+
+.dot {
+  font-size: 16px;
+}
+
+/* RIGHT SIDE TUNE BUTTON */
+.tune-btn {
+  margin-left: auto;
+  background: #000;
+  border: 2px solid #0f0;
+  color: #0f0;
+  font-family: "Courier New", monospace;
+  padding: 4px 10px;
+  cursor: pointer;
+  min-width: 80px;
+}
+
+.tune-btn:hover {
+  background: #003300;
+}
+
+#step-btn {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+
+  background: #000;
+  color: #0f0;
+  border: 2px solid #0f0;
+
+  font-family: "Courier New", monospace;
+  font-size: 14px;
+
+  padding: 8px 12px;
+  cursor: pointer;
+  width: 160px;
+  white-space: nowrap;
+}
+
+#step-btn:hover {
+  background: #003300;
+}
+</style>
 </head>
+
 <body>
-  <h1>24Radio</h1>
+<h1>24Radio</h1>
 
-  <div id="radio-panel">
-    <div class="freq-row">
-      <div class="freq-box-wrapper">
-        <div class="freq-label">COM1 ACTIVE</div>
-        <div id="active-freq">---</div>
-      </div>
-      <div class="freq-box-wrapper">
-        <div class="freq-label">COM1 STANDBY</div>
-        <input type="text" id="standby-freq" placeholder="118.100" maxlength="7">
-      </div>
-      <div class="swap-box-wrapper">
-        <button id="swap-btn">SWAP</button>
-      </div>
+<div class="main-container">
+
+<!-- RADIO PANEL (UNCHANGED) -->
+<div id="radio-panel">
+
+  <div class="freq-row">
+    <div class="freq-box-wrapper">
+      <div class="freq-label">COM1 ACTIVE</div>
+      <div id="active-freq">---</div>
     </div>
 
-    <div class="knob-container">
-      <div class="knob" id="freq-knob">
-        <div class="knob-marker"></div>
-      </div>
-      <div class="knob-label">TUNE</div>
+    <div class="freq-box-wrapper">
+      <div class="freq-label">COM1 STANDBY</div>
+      <input type="text" id="standby-freq" placeholder="118.100" maxlength="7">
     </div>
 
-    <div id="result"></div>
+    <div class="swap-box-wrapper">
+      <button id="swap-btn">SWAP</button>
+    </div>
   </div>
 
-  <script src="app.js"></script>
+  <div class="knob-container">
+    <div class="knob" id="freq-knob">
+      <div class="knob-marker"></div>
+    </div>
+    <div class="knob-label">TUNE</div>
+
+    
+  </div>
+  <button id="step-btn">STEP: 0.050</button>
+  <div id="result"></div>
+</div>
+
+<!-- CONTROLLER PANEL -->
+<div id="controller-panel">
+
+  <div class="panel-title">FREQUENCY DATABASE</div>
+
+  <div class="controller-toolbar">
+    <input type="text" id="search-bar" placeholder="Search frequencies..." />
+
+    <select id="filter-area">
+      <option value="all">All Areas</option>
+    </select>
+
+    <select id="filter-airport">
+      <option value="all">All Airports</option>
+    </select>
+
+    <select id="filter-type">
+  <option value="all">All Types</option>
+  <option value="GND">Ground</option>
+  <option value="TWR">Tower</option>
+  <option value="CENTER">Center</option>
+  <option value="ATIS">ATIS</option>
+</select>
+  </div>
+
+  <div id="frequency-list"></div>
+
+</div>
+
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>

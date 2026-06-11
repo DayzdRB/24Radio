@@ -1,4 +1,6 @@
 let frequencies = [];
+let controllers = [];
+let controllerStatus = {};
 let activeFreq = null;
 let standbyFreq = null;
 let currentAtisLoop = null;
@@ -77,7 +79,7 @@ function getRandomTtsPreset(previousPreset) {
   return candidate;
 }
 
-// =============================== //
+// ==== CONTROLLER STATUS / DOT LOGIC ==== //
 
 async function loadfrequencies() {
   try {
@@ -94,18 +96,232 @@ async function loadfrequencies() {
   }
 }
 
-loadfrequencies();
+function populateFilters() {
+  const areaSelect = document.getElementById("filter-area");
+  const airportSelect = document.getElementById("filter-airport");
+
+  const areas = [...new Set(frequencies.map(f => f.area).filter(Boolean))].sort();
+  const airports = [...new Set(frequencies.map(f => f.airport).filter(Boolean))].sort();
+
+  areas.forEach(area => {
+    const opt = document.createElement("option");
+    opt.value = area;
+    opt.textContent = area;
+    areaSelect.appendChild(opt);
+  });
+
+  airports.forEach(airport => {
+    const opt = document.createElement("option");
+    opt.value = airport;
+    opt.textContent = airport;
+    airportSelect.appendChild(opt);
+  });
+}
+
+async function loadcontrollers() {
+  try {
+    const response = await fetch("/api/controllers");
+
+    if (!response.ok) {
+      throw new Error("Controller API error: " + response.status);
+    }
+
+    const data = await response.json();
+
+    controllers = data;
+
+    
+
+    console.log("Controllers loaded:", controllers);
+
+  } catch(error) {
+    console.error("Error loading controllers:", error);
+  }
+}
+
+
+
+function applyFilters() {
+
+  
+  
+  const searchValue = document.getElementById("search-bar").value.toLowerCase();
+  const areaFilter = document.getElementById("filter-area").value;
+  const airportFilter = document.getElementById("filter-airport").value;
+  const typeFilter = document.getElementById("filter-type").value;
+
+  console.log("Sample types:", [...new Set(frequencies.map(f => f.type))]);
+  console.log("Selected type:", typeFilter);
+  
+  const filtered = frequencies.filter(freq => {
+
+    const matchesSearch =
+      !searchValue ||
+      freq.name?.toLowerCase().includes(searchValue) ||
+      freq.airport?.toLowerCase().includes(searchValue) ||
+      freq.freq?.toLowerCase().includes(searchValue) ||
+      freq.area?.toLowerCase().includes(searchValue);
+
+    const matchesArea =
+      areaFilter === "all" || freq.area === areaFilter;
+
+    const matchesAirport =
+      airportFilter === "all" || freq.airport === airportFilter;
+
+    const matchesType =
+      typeFilter === "all" || freq.type === typeFilter;
+
+    return matchesSearch && matchesArea && matchesAirport && matchesType;
+  });
+
+  renderFrequencyList(filtered);
+}
+
+async function initializeApp() {
+  await loadfrequencies();
+  await loadcontrollers();
+
+  populateFilters();
+
+  processControllerData();   // MUST happen before UI render
+
+  applyFilters();            // this will call renderFrequencyList internally
+}
+window.addEventListener("DOMContentLoaded", initializeApp);
+
+
+
+
+
+
+
+
+
+
+// Stores controller status by airport_position
+
+
+function processControllerData() {
+  controllerStatus = {};
+
+  controllers.forEach(controller => {
+    // Normalize CTR -> CENTER to match freq.json type
+    const positionType = controller.position === "CTR" ? "CENTER" : controller.position;
+
+    const key = controller.airport + "_" + positionType;
+
+    controllerStatus[key] = {
+      online: !controller.claimable,
+      holder: controller.holder
+    };
+  });
+
+  console.log("Processed controller status:", controllerStatus);
+}
+
+
+function getControllerDot(freqEntry){
+
+  const key = freqEntry.airport + "_" + freqEntry.type;
+  const controller = controllerStatus[key];
+
+  // ATIS is always green
+  if (freqEntry.type === "ATIS") {
+    return "green";
+  }
+
+  // CENTER logic fix
+  if (freqEntry.type === "CENTER") {
+    return controller && controller.online ? "green" : "red";
+  }
+
+  if (!controller) {
+    return "red";
+  }
+
+  return controller.online ? "green" : "red";
+}
+
+// ===== DOM ELEMENTS =====
 
 const activeFreqEl = document.getElementById("active-freq");
 const standbyFreqEl = document.getElementById("standby-freq");
-const freqInput = document.getElementById("standby-freq");
 const swapBtn = document.getElementById("swap-btn");
 const resultEl = document.getElementById("result");
 
+const searchBar = document.getElementById("search-bar");
+const areaFilter = document.getElementById("filter-area");
+const airportFilter = document.getElementById("filter-airport");
+const typeFilter = document.getElementById("filter-type");
+
+searchBar?.addEventListener("input", applyFilters);
+areaFilter?.addEventListener("change", applyFilters);
+airportFilter?.addEventListener("change", applyFilters);
+typeFilter?.addEventListener("change", applyFilters);
+
 function updateDisplay() {
+  if(!activeFreqEl || !standbyFreqEl) return;
   activeFreqEl.textContent = activeFreq || "---";
-  standbyFreqEl.value = standbyFreq || "---";
+  standbyFreqEl.value = standbyFreq ?? "";
 }
+
+
+function renderFrequencyList(filteredList = frequencies) {
+  const listEl = document.getElementById("frequency-list");
+  listEl.innerHTML = "";
+
+  const grouped = {};
+
+  filteredList.forEach(freq => {
+    const area = freq.area || "UNKNOWN AREA";
+
+    if (!grouped[area]) {
+      grouped[area] = [];
+    }
+
+    grouped[area].push(freq);
+  });
+
+  const areaOrder = [];
+
+  filteredList.forEach(freq => {
+    const area = freq.area || "UNKNOWN AREA";
+    if (!areaOrder.includes(area)) {
+      areaOrder.push(area);
+    }
+  });
+
+  areaOrder.forEach(area => {
+    // AREA HEADER
+    const header = document.createElement("div");
+    header.className = "area-header";
+    header.textContent = area;
+    listEl.appendChild(header);
+
+    // FREQUENCIES
+    grouped[area].forEach(freq => {
+      const dotColor = getControllerDot(freq);
+
+      const row = document.createElement("div");
+      row.className = "freq-item";
+
+      row.innerHTML = `
+      <div class="freq-left">
+      <span class="dot" style="color:${dotColor}">●</span>
+      <span class="freq">${freq.freq}</span>
+      <span class="name">${freq.name || ""}</span>
+      <span class="type">${freq.type}</span>
+      </div>
+      <button class="tune-btn" onclick="tuneFrequency('${freq.freq}')">TUNE</button>
+    `;
+
+      listEl.appendChild(row);
+    });
+  });
+}
+  
+
+ 
 
 function findFrequencyByNumber(freqStr) {
   const normalizedInput = parseFloat(freqStr).toFixed(3);
@@ -116,14 +332,51 @@ function showMessage(message) {
   resultEl.textContent = message;
 }
 
-function isAtisEntry(entry) {
-  return entry && !entry.channelID;
+function tuneFrequency(freq) {
+  const standby = document.getElementById("standby-freq");
+
+  currentFreq = Number(parseFloat(freq).toFixed(3));
+
+  standby.value = currentFreq.toFixed(3);
+
+  // Force step to 0.005 so any frequency can be reached
+  GlobalfreqIncrement = 0.005;
+  const stepBtn = document.getElementById("step-btn");
+  if (stepBtn) stepBtn.textContent = "STEP: 0.005";
+
+  const freqIncrement = GlobalfreqIncrement;
+  const degreesPerStep = 10;
+
+  const steps = Math.round(
+    (currentFreq - 122.800) / freqIncrement
+  );
+
+  totalRotation = steps * degreesPerStep;
+
+  if (knob) {
+    knob.style.transform = `rotate(${totalRotation}deg)`;
+  }
+
+  showMessage("Tuned standby to " + currentFreq.toFixed(3));
 }
 
-function getAirportFromAtisName(name) {
-  if (!name) return null;
-  const parts = name.split("_");
-  return parts[0] || null;
+function isAtisEntry(entry){
+
+  return (
+    entry &&
+    entry.type === "ATIS"
+  );
+
+}
+
+function getAirportFromEntry(entry){
+
+  if(!entry)
+    return null;
+
+
+  return entry.airport;
+
 }
 
 async function fetchAllAtis() {
@@ -250,13 +503,13 @@ function formatAtisIntoLines(text) {
     if (line.includes("DEPARTURE RUNWAY") && line.includes("ARRIVAL RUNWAY")) {
       const splitIndex = line.indexOf(" ARRIVAL RUNWAY ");
       if (splitIndex !== -1) {
-        let depLine = line.substring(0, splitIndex).trim();
-        let arrLine = line.substring(splitIndex + 1).trim();
+  let depLine = line.substring(0, splitIndex).trim();
+  let arrLine = line.substring(splitIndex + " ARRIVAL RUNWAY ".length).trim(); // fixed
 
-        lines.push(depLine);
-        lines.push(arrLine);
-        continue;
-      }
+  lines.push(depLine);
+  lines.push("ARRIVAL RUNWAY " + arrLine);
+  continue;
+}
     }
 
     line = line.replace(/\b(\d{4})Z\b/g, (m, num) => digitsToAviation(num) + " ZULU");
@@ -403,9 +656,9 @@ let startAngle = 0;
 let totalRotation = 0;
 let currentFreq = 122.800;
 
-freqInput.value = currentFreq.toFixed(3);
+standbyFreqEl.value = currentFreq.toFixed(3);
 
-freqInput.addEventListener("input", (e) => {
+standbyFreqEl.addEventListener("input", (e) => {
   const typedFreq = parseFloat(e.target.value);
   if (!isNaN(typedFreq)) {
     currentFreq = typedFreq;
@@ -441,21 +694,16 @@ if (knob) {
   }
 
   function drag(e) {
-    if (!isDragging) return;
+  if (!isDragging) return;
 
-    const rect = knob.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
-    
-    let deltaAngle = angle - startAngle;
-    if (deltaAngle > Math.PI) deltaAngle -= 2 * Math.PI;
-    if (deltaAngle < -Math.PI) deltaAngle += 2 * Math.PI;
-    
-    let deltaDegrees = deltaAngle * (180 / Math.PI);
-    totalRotation += deltaDegrees;
+  const rect = knob.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
 
-    knob.style.transform = `rotate(${totalRotation}deg)`;
+  let deltaAngle = angle - startAngle;
+  if (deltaAngle > Math.PI) deltaAngle -= 2 * Math.PI;
+  if (deltaAngle < -Math.PI) deltaAngle += 2 * Math.PI;
 
     const freqIncrement = GlobalfreqIncrement;
     const degreesPerStep = 10;
@@ -470,8 +718,7 @@ if (knob) {
       showMessage("Frequency: " + currentFreq.toFixed(3));
     }
 
-    startAngle = angle;
-  }
+  knob.style.transform = `rotate(${totalRotation}deg)`;
 
   function endDrag() {
     isDragging = false;
@@ -485,6 +732,33 @@ if (knob) {
     currentFreq = Math.round(newFreq * 1000) / 1000;
     freqInput.value = currentFreq.toFixed(3);
   }
+
+  startAngle = angle;
+}
+
+
+function endDrag() {
+  isDragging = false;
+
+  const degreesPerStep = 10;
+
+  totalRotation =
+    Math.round(totalRotation / degreesPerStep) * degreesPerStep;
+
+  knob.style.transform = `rotate(${totalRotation}deg)`;
+
+  const freqIncrement = GlobalfreqIncrement;
+
+  const steps = Math.round(totalRotation / degreesPerStep);
+
+  const newFreq = 122.800 + (steps * freqIncrement);
+
+  currentFreq = Number(newFreq.toFixed(3));
+
+  standbyFreqEl.value = currentFreq.toFixed(3);
+}
+
+
 }
 
 window.addEventListener("beforeunload", () => {
@@ -496,57 +770,99 @@ document.addEventListener("visibilitychange", () => {
     stopAtisLoop();
   }
 });
+if (swapBtn) {
+  swapBtn.addEventListener("click", async () => {
+    const inputFreq = standbyFreqEl.value.trim();
 
-swapBtn.addEventListener("click", async () => {
-  const inputFreq = freqInput.value.trim();
-  
-  if (!inputFreq) {
-    showMessage("No standby frequency to swap.");
-    return;
-  }
+    if (!inputFreq) {
+      showMessage("No standby frequency to swap.");
+      return;
+    }
 
-  const standbyEntry = findFrequencyByNumber(inputFreq);
+    const standbyEntry = findFrequencyByNumber(inputFreq);
 
-  console.log("Standby Entry:", standbyEntry);
-  console.log("Standby Entry Name:", standbyEntry?.name);
+    console.log("Standby Entry:", standbyEntry);
+    console.log("Standby Entry Name:", standbyEntry?.name);
 
-  stopAtisLoop();
+    stopAtisLoop();
 
-  const temp = activeFreq;
-  activeFreq = inputFreq;
-  standbyFreq = temp;
+    // Swap active and standby
+    const temp = activeFreq;
+    activeFreq = inputFreq;
+    standbyFreq = temp;
 
-  updateDisplay();
-  
-  if (!standbyEntry) {
-    showMessage("Frequency not found: " + inputFreq);
-    return;
-  }
+    updateDisplay();
 
-  const displayName = standbyEntry.name || "Unknown";
-  showMessage("Swapped. Active: " + activeFreq + " - " + displayName);
+    if (!standbyEntry) {
+      showMessage("Frequency not found: " + inputFreq);
+      return;
+    }
 
-  if (isAtisEntry(standbyEntry)) {
-    const airport = getAirportFromAtisName(standbyEntry.name);
-    console.log("Airport:", airport);
-    console.log("Frequency Name:", standbyEntry.name);
-    
-    if (airport) {
+    const displayName = standbyEntry.name || "Unknown";
+
+    showMessage(
+      "Swapped. Active: " + activeFreq + " - " + displayName
+    );
+
+    // Handle ATIS frequencies
+    if (isAtisEntry(standbyEntry)) {
+
+      const airport = getAirportFromEntry(standbyEntry);
+
+      console.log("Airport:", airport);
+      console.log("Frequency Name:", standbyEntry.name);
+
+      if (!airport) return;
+
       try {
+
         const allAtis = await fetchAllAtis();
         const atis = getAtisForAirport(allAtis, airport);
 
         if (atis) {
-          speakAtisLoop(airport, atis, standbyEntry.name);
+          speakAtisLoop(
+            airport,
+            atis,
+            standbyEntry.name
+          );
         } else {
-          showMessage(standbyEntry.name + " - ATIS not found");
+          showMessage(
+            standbyEntry.name + " - ATIS not found"
+          );
         }
+
       } catch (err) {
-        console.error("Error fetching ATIS after swap:", err);
-        showMessage(standbyEntry.name + " - Failed to fetch ATIS");
+
+        console.error(
+          "Error fetching ATIS after swap:",
+          err
+        );
+
+        showMessage(
+          standbyEntry.name + " - Failed to fetch ATIS"
+        );
       }
     }
-  }
-});
+  });
+}
 
 updateDisplay();
+
+// ==== STEP SIZE TOGGLE ==== //
+window.addEventListener("DOMContentLoaded", () => {
+  const stepBtn = document.getElementById("step-btn");
+  if (!stepBtn) return;
+
+  const steps = [0.005, 0.05, 0.1];
+  let stepIndex = 1; // default = 0.05
+
+  // ensure UI matches initial value
+  stepBtn.textContent = `STEP: ${steps[stepIndex].toFixed(3)}`;
+
+  stepBtn.addEventListener("click", () => {
+    stepIndex = (stepIndex + 1) % steps.length;
+    GlobalfreqIncrement = steps[stepIndex];
+
+    stepBtn.textContent = `STEP: ${GlobalfreqIncrement.toFixed(3)}`;
+  });
+});

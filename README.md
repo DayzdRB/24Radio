@@ -1,37 +1,34 @@
 Hello
-5/31/26
-{
-Today I created the index.html file
-implemented a .json file to include all frequencies with their channelID and their name
-I also made the app.js file which successfully fetches the .json
-I added as many ATIS frequencies as possible
 
-next steps:
-add a bare bones user interface that uses a search frequency or scross function to set a frequency and have the channel name be displayed along with connected
-connect voice channel links to the channelID
-make it look Pretty(css file)
-access the data24 api using Oauth2
+This is the 24Radio 1.1 Branch
+Current update plans include adding a viewable Frequencies list
+These frequenciees will be paired with their Area Frequencies so all Rockford frequencies are next to each other. Same for Perth and Orenji et cetra.
+You can directly tune each frequency off the list onto standby by clicking the tune button next to its frequency
+I want a dot off to the left of the frequency to show the controller status. Green for online and red for offline
+This goes for all airports Ground Towers and Controlers, ATIS will always be online.
 
-Add remaining ATIS freqeuncies:
-  Boltic Airfield
-  Training Centre
-  SABA
-  and Airbase Garry
+Future updates:
+-- most important
+Add a ATIS text display below the tune knob
+--
+Add volume knob
+Add settings
+Add ATiS voice controls
+--ATIS voice controls include voice preset, speed, pitch, accent, et cetra
 
-endgame:
-mimic the G1000 or G430W
-}
 
-6/2/2026
-{
-I added a knob
-Added better phonetics
-I update HUD
-I shared website with a few people and the reviews were decent
+6/5/26
+Today I updated the freq.josn to support the upcoming 1.1 update to show all frequencies on the main page
+I added /controllers API support
 
-next steps:
-add a list of useable frequencies and dots showing grey, red, orange, or green dependign on how many controllers are online at an airport / island
-Add a map
-add working comms tuning with discord
-Update the looks and maybe
-}
+6/6/2026
+I added a Frequency Data base with quick tune buttons
+I added a Knob tune increment button for easy tuning
+
+6/10/2026
+Today I fixed the search engine for the Freq Database after starting development on it on 6/6/2026
+Dot system is working. I will probably leave out yellow dots since it is not nessisary and the current system works just as well
+I fixed the tune button so it will switch to 0.005 on the increment allowing any frequency to be tuned when you hit swap.
+
+
+
