@@ -478,13 +478,13 @@ function formatAtisIntoLines(text) {
     if (line.includes("DEPARTURE RUNWAY") && line.includes("ARRIVAL RUNWAY")) {
       const splitIndex = line.indexOf(" ARRIVAL RUNWAY ");
       if (splitIndex !== -1) {
-        let depLine = line.substring(0, splitIndex).trim();
-        line.substring(splitIndex + " ARRIVAL RUNWAY ".length)
+  let depLine = line.substring(0, splitIndex).trim();
+  let arrLine = line.substring(splitIndex + " ARRIVAL RUNWAY ".length).trim(); // fixed
 
-        lines.push(depLine);
-        lines.push(arrLine);
-        continue;
-      }
+  lines.push(depLine);
+  lines.push("ARRIVAL RUNWAY " + arrLine);
+  continue;
+}
     }
 
     line = line.replace(/\b(\d{4})Z\b/g, (m, num) => digitsToAviation(num) + " ZULU");
