@@ -22,3 +22,8 @@ I added /controllers API support
 I added a Frequency Data base with quick tune buttons
 I added a Knob tune increment button for easy tuning
 
+6/10/2026
+Today I fixed the search engine for the Freq Database after starting development on it on 6/6/2026
+Dot system is working. I will probably leave out yellow dots since it is not nessisary and the current system works just as well
+
+
