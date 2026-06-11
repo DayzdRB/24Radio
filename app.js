@@ -96,6 +96,28 @@ async function loadfrequencies() {
   }
 }
 
+function populateFilters() {
+  const areaSelect = document.getElementById("filter-area");
+  const airportSelect = document.getElementById("filter-airport");
+
+  const areas = [...new Set(frequencies.map(f => f.area).filter(Boolean))].sort();
+  const airports = [...new Set(frequencies.map(f => f.airport).filter(Boolean))].sort();
+
+  areas.forEach(area => {
+    const opt = document.createElement("option");
+    opt.value = area;
+    opt.textContent = area;
+    areaSelect.appendChild(opt);
+  });
+
+  airports.forEach(airport => {
+    const opt = document.createElement("option");
+    opt.value = airport;
+    opt.textContent = airport;
+    airportSelect.appendChild(opt);
+  });
+}
+
 async function loadcontrollers() {
   try {
     const response = await fetch("/api/controllers");
@@ -159,6 +181,8 @@ async function initializeApp() {
   await loadfrequencies();
   await loadcontrollers();
 
+  populateFilters();
+
   processControllerData();   // MUST happen before UI render
 
   applyFilters();            // this will call renderFrequencyList internally
@@ -177,23 +201,19 @@ window.addEventListener("DOMContentLoaded", initializeApp);
 // Stores controller status by airport_position
 
 
-function processControllerData(){
-
+function processControllerData() {
   controllerStatus = {};
 
   controllers.forEach(controller => {
+    // Normalize CTR -> CENTER to match freq.json type
+    const positionType = controller.position === "CTR" ? "CENTER" : controller.position;
 
-    const key =
-      controller.airport +
-      "_" +
-      controller.position;
-
+    const key = controller.airport + "_" + positionType;
 
     controllerStatus[key] = {
       online: !controller.claimable,
       holder: controller.holder
     };
-
   });
 
   console.log("Processed controller status:", controllerStatus);
