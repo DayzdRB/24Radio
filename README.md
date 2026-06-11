@@ -8,10 +8,13 @@ I want a dot off to the left of the frequency to show the controller status. Gre
 This goes for all airports Ground Towers and Controlers, ATIS will always be online.
 
 Future updates:
+-- most important
+Add a ATIS text display below the tune knob
+--
 Add volume knob
 Add settings
 Add ATiS voice controls
-  --- ATIS voice controls include voice preset, speed, pitch, accent, et cetra
+--ATIS voice controls include voice preset, speed, pitch, accent, et cetra
 
 
 6/5/26
