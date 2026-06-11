@@ -4,327 +4,566 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="Favicon.png">
-<title>24Radio - ATC24 Radio Client</title>
+<title>24Radio — ATC24 Radio Client</title>
+
+<!-- Placard / data / seven-segment faces -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/dseg@0.46.0/css/dseg.css" rel="stylesheet">
 
 <style>
+:root {
+  --bg:        #090c10;
+  --bg-2:      #0c1116;
+  --panel:     #131a21;
+  --panel-2:   #18212a;
+  --edge:      #2a3742;
+  --edge-hi:   rgba(255,255,255,.05);
+  --edge-lo:   #04070a;
+  --line:      rgba(255,255,255,.06);
+
+  --text:      #c7d3dd;
+  --muted:     #6c7c8a;
+  --faint:     #45525e;
+
+  --act:       #4cf2a4;   /* active freq — LCD green  */
+  --act-glow:  rgba(76,242,164,.55);
+  --sby:       #ffb648;   /* standby freq — amber      */
+  --sby-glow:  rgba(255,182,72,.5);
+  --cyan:      #38d8ea;   /* interactive accent        */
+  --danger:    #ff5a52;
+
+  --screen:    #05140d;   /* recessed LCD background    */
+
+  --f-disp: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --f-mono: "IBM Plex Mono", "Courier New", monospace;
+  --f-seg:  "DSEG7 Classic", "IBM Plex Mono", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
 body {
   margin: 0;
-  background: #111;
-  color: #0f0;
-  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, #11202c 0%, transparent 60%),
+    var(--bg);
+  color: var(--text);
+  font-family: var(--f-mono);
+  -webkit-font-smoothing: antialiased;
 }
 
-h1 {
-  text-align: center;
-  margin: 15px 0;
-}
-
-.main-container {
+/* ============ TOP BAR ============ */
+.topbar {
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 20px;
-  padding: 10px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   flex-wrap: wrap;
+  padding: 14px clamp(14px, 4vw, 40px);
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255,255,255,.02), transparent);
 }
 
-/* =========================
-   RADIO PANEL (UNCHANGED)
-========================= */
-#radio-panel {
-  background: #222;
-  border: 3px solid #0f0;
-  border-radius: 8px;
-  display: inline-block;
-  padding: 20px;
-  margin-top: 0;
-  flex: 0 0 auto;
+.brand { display: flex; align-items: center; gap: 12px; }
 
-   position: relative;
+.brand-mark {
+  font-family: var(--f-disp);
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--bg);
+  background: var(--act);
+  padding: 4px 9px;
+  border-radius: 5px;
+  box-shadow: 0 0 18px var(--act-glow);
+  letter-spacing: -1px;
 }
 
-#active-freq {
-  font-size: 20px;
-  font-family: "Courier New", monospace;
-  background: #000;
-  border: 2px solid #0f0;
-  padding: 8px 16px;
-  display: inline-block;
-  width: 160px;
-  text-align: center;
+.brand-name {
+  font-family: var(--f-disp);
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: 4px;
+  line-height: 1;
 }
+.brand-sub {
+  font-family: var(--f-disp);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-family: var(--f-disp);
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+}
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i {
+  font-style: normal;
+  font-size: 11px;
+  line-height: 1;
+}
+.legend .on  { color: var(--act); text-shadow: 0 0 8px var(--act-glow); }
+.legend .off { color: var(--danger); text-shadow: 0 0 8px rgba(255,90,82,.5); }
+
+/* ============ LAYOUT ============ */
+.layout {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+  padding: clamp(16px, 3vw, 28px);
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+/* ============ RADIO UNIT (signature) ============ */
+#radio-panel { position: sticky; top: 22px; }
+
+.com-unit {
+  background:
+    linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow:
+    inset 0 1px 0 var(--edge-hi),
+    0 18px 40px rgba(0,0,0,.5);
+}
+
+.com-screen {
+  background: var(--screen);
+  border: 1px solid #0c2e1f;
+  border-radius: 9px;
+  padding: 14px 16px;
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.6),
+    inset 0 6px 22px rgba(0,0,0,.75);
+}
+
+.com-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.com-tag {
+  font-family: var(--f-disp);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--faint);
+  align-self: center;
+}
+
+.com-mhz {
+  font-family: var(--f-disp);
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--faint);
+  align-self: center;
+}
+
+.seg {
+  font-family: var(--f-seg);
+  font-size: 30px;
+  text-align: right;
+  letter-spacing: 1px;
+  /* ghost segments behind the lit ones — the real-LCD touch */
+  background:
+    linear-gradient(transparent, transparent);
+}
+.seg-act { color: var(--act); text-shadow: 0 0 10px var(--act-glow); }
+.seg-sby { color: var(--sby); text-shadow: 0 0 10px var(--sby-glow); }
+
+#active-freq { min-height: 38px; }
 
 #standby-freq {
-  background: #000;
-  color: #0f0;
-  border: 2px solid #0f0;
-  padding: 8px 16px;
-  font-size: 20px;
-  font-family: "Courier New", monospace;
-  width: 160px;
-  text-align: center;
+  width: 100%;
+  border: none;
   outline: none;
+  background: transparent;
+  padding: 0;
+  /* inherits .seg .seg-sby */
 }
+#standby-freq:focus { text-shadow: 0 0 16px var(--sby-glow); }
+#standby-freq::placeholder { color: rgba(255,182,72,.25); }
+
+.com-divider {
+  height: 1px;
+  margin: 10px 0;
+  background: linear-gradient(90deg, transparent, #103a28, transparent);
+}
+
+/* controls */
+.com-controls {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "swap knob"
+    "step knob";
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.btn {
+  font-family: var(--f-disp);
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--text);
+  background: linear-gradient(180deg, var(--panel-2), #0f151b);
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color .12s ease, color .12s ease, box-shadow .12s ease;
+}
+.btn:hover { border-color: var(--cyan); color: #eaf6f9; }
+.btn:active { box-shadow: inset 0 3px 10px rgba(0,0,0,.5); }
 
 #swap-btn {
-  background: #000;
-  color: #0f0;
-  border: 2px solid #0f0;
+  grid-area: swap;
+  font-size: 22px;
+  height: 52px;
+}
+#swap-btn:hover { box-shadow: 0 0 18px rgba(56,216,234,.25); }
 
-  padding: 8px 16px;
-  font-size: 20px;
-  font-family: "Courier New", monospace;
-  cursor: pointer;
-
-  width: 160px;
-  height: 46px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
+#step-btn {
+  grid-area: step;
+  font-size: 14px;
+  height: 38px;
+  color: var(--muted);
 }
 
-#swap-btn:hover {
-  background: #003300;
-}
-
-.freq-row {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 15px;
-  margin-bottom: 15px;
-}
-
-.freq-box-wrapper,
-.swap-box-wrapper {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-/* KNOB */
-.knob-container {
+/* concentric metal knob */
+.knob-wrap {
+  grid-area: knob;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  margin: 15px;
-  user-select: none;
+  gap: 8px;
 }
-
 .knob {
-  width: 100px;
-  height: 100px;
+  width: 104px;
+  height: 104px;
   border-radius: 50%;
-  background: #000;
-  border: 3px solid #0f0;
   position: relative;
   cursor: grab;
+  background:
+    radial-gradient(circle at 50% 38%, #2b3743 0%, #161d24 55%, #0a0e12 100%);
+  border: 1px solid var(--edge);
+  box-shadow:
+    inset 0 2px 4px rgba(255,255,255,.06),
+    inset 0 -8px 16px rgba(0,0,0,.6),
+    0 6px 14px rgba(0,0,0,.5);
+  touch-action: none;
 }
-
-.knob-marker {
-  width: 8px;
-  height: 20px;
-  background: #0f0;
+.knob::after {
+  content: "";
   position: absolute;
-  top: 8px;
+  inset: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 35%, #20292f, #0c1014);
+  box-shadow: inset 0 1px 2px rgba(255,255,255,.05), inset 0 -3px 8px rgba(0,0,0,.6);
+}
+.knob-tick {
+  position: absolute;
+  top: 7px;
   left: 50%;
   transform: translateX(-50%);
+  width: 5px;
+  height: 22px;
+  border-radius: 3px;
+  background: var(--cyan);
+  box-shadow: 0 0 9px rgba(56,216,234,.7);
 }
-
 .knob-label {
-  margin-top: 12px;
-  color: #0f0;
-  font-family: "Courier New", monospace;
-  font-size: 14px;
+  font-family: var(--f-disp);
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: var(--faint);
 }
 
-/* =========================
-   CONTROLLER PANEL
-========================= */
+/* status readout line */
+#result {
+  margin-top: 14px;
+  min-height: 18px;
+  font-family: var(--f-disp);
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  color: var(--cyan);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* ============ DATABASE PANEL ============ */
 #controller-panel {
-  background: #222;
-  border: 3px solid #0f0;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 900px;
-  padding: 15px;
-  flex: 1;
-  min-width: 400px;
+  background: linear-gradient(180deg, var(--panel), var(--bg-2));
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: inset 0 1px 0 var(--edge-hi);
 }
 
 .panel-title {
-  color: #0f0;
-  font-family: "Courier New", monospace;
-  font-size: 14px;
-  margin-bottom: 10px;
+  font-family: var(--f-disp);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 3px;
+  color: var(--muted);
+  margin: 2px 2px 14px;
 }
 
 .controller-toolbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr repeat(3, minmax(110px, auto));
   gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
-
 .controller-toolbar input,
 .controller-toolbar select {
-  background: #000;
-  color: #0f0;
-  border: 2px solid #0f0;
-  padding: 6px;
-  font-family: "Courier New", monospace;
+  font-family: var(--f-mono);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color .12s ease, box-shadow .12s ease;
 }
+.controller-toolbar input::placeholder { color: var(--faint); }
+.controller-toolbar input:focus,
+.controller-toolbar select:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(56,216,234,.12);
+}
+.controller-toolbar select { cursor: pointer; }
 
+/* list */
 #frequency-list {
-  margin-top: 10px;
-  padding: 10px;
-  background: #111;
-  border: 2px solid #0f0;
-  border-radius: 6px;
-  max-height: 500px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 6px;
+  max-height: 560px;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--edge) transparent;
+}
+#frequency-list::-webkit-scrollbar { width: 9px; }
+#frequency-list::-webkit-scrollbar-thumb {
+  background: var(--edge); border-radius: 5px;
 }
 
-/* =========================
-   FREQUENCY ROW + TUNE BUTTON
-========================= */
 .area-header {
-  margin-top: 10px;
-  padding: 6px;
-  background: #000;
-  border-left: 3px solid #0f0;
-  font-weight: bold;
-  font-family: "Courier New", monospace;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-family: var(--f-disp);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 2.5px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  padding: 9px 10px 7px;
+  margin-top: 4px;
+  background: linear-gradient(180deg, var(--bg), rgba(9,12,16,.92));
+  border-bottom: 1px solid var(--line);
 }
+.area-header:first-child { margin-top: 0; }
 
 .freq-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px;
-  border-bottom: 1px solid #0a0;
-  font-family: "Courier New", monospace;
+  gap: 12px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--line);
+  transition: background .1s ease;
 }
+.freq-item:last-child { border-bottom: none; }
+.freq-item:hover { background: rgba(56,216,234,.05); }
 
 .freq-left {
   display: flex;
-  gap: 10px;
   align-items: center;
+  gap: 12px;
   flex: 1;
+  min-width: 0;
 }
 
 .dot {
-  font-size: 16px;
+  font-size: 11px;
+  line-height: 1;
+  /* inline color set by JS (green/red); glow tracks it */
+  text-shadow: 0 0 7px currentColor;
+  flex: 0 0 auto;
 }
 
-/* RIGHT SIDE TUNE BUTTON */
+.freq {
+  font-family: var(--f-mono);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text);
+  min-width: 74px;
+  flex: 0 0 auto;
+}
+
+.name {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.type {
+  font-family: var(--f-disp);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--faint);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 2px 8px;
+  flex: 0 0 auto;
+}
+
 .tune-btn {
   margin-left: auto;
-  background: #000;
-  border: 2px solid #0f0;
-  color: #0f0;
-  font-family: "Courier New", monospace;
-  padding: 4px 10px;
+  font-family: var(--f-disp);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--cyan);
+  background: transparent;
+  border: 1px solid var(--edge);
+  border-radius: 7px;
+  padding: 7px 14px;
   cursor: pointer;
-  min-width: 80px;
+  flex: 0 0 auto;
+  transition: background .12s ease, color .12s ease, border-color .12s ease;
 }
-
 .tune-btn:hover {
-  background: #003300;
+  background: var(--cyan);
+  border-color: var(--cyan);
+  color: var(--bg);
 }
 
-#step-btn {
-  position: absolute;
-  right: 20px;
-  bottom: 20px;
-
-  background: #000;
-  color: #0f0;
-  border: 2px solid #0f0;
-
-  font-family: "Courier New", monospace;
-  font-size: 14px;
-
-  padding: 8px 12px;
-  cursor: pointer;
-  width: 160px;
-  white-space: nowrap;
+/* ============ FOCUS / MOTION A11Y ============ */
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
 }
 
-#step-btn:hover {
-  background: #003300;
+/* ============ RESPONSIVE ============ */
+@media (max-width: 820px) {
+  .layout { grid-template-columns: 1fr; }
+  #radio-panel { position: static; }
+  .com-unit { max-width: 420px; margin: 0 auto; }
+  .legend { display: none; }
+}
+@media (max-width: 540px) {
+  .controller-toolbar { grid-template-columns: 1fr 1fr; }
+  .controller-toolbar input { grid-column: 1 / -1; }
+  .name { display: none; }
 }
 </style>
 </head>
 
 <body>
-<h1>24Radio</h1>
 
-<div class="main-container">
-
-<!-- RADIO PANEL (UNCHANGED) -->
-<div id="radio-panel">
-
-  <div class="freq-row">
-    <div class="freq-box-wrapper">
-      <div class="freq-label">COM1 ACTIVE</div>
-      <div id="active-freq">---</div>
-    </div>
-
-    <div class="freq-box-wrapper">
-      <div class="freq-label">COM1 STANDBY</div>
-      <input type="text" id="standby-freq" placeholder="118.100" maxlength="7">
-    </div>
-
-    <div class="swap-box-wrapper">
-      <button id="swap-btn">SWAP</button>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">24</span>
+    <div>
+      <div class="brand-name">RADIO</div>
+      <div class="brand-sub">ATC24 RADIO CLIENT</div>
     </div>
   </div>
+  <div class="legend">
+    <span><i class="on">●</i> ONLINE</span>
+    <span><i class="off">●</i> UNSTAFFED</span>
+    <span>ATIS ALWAYS LIVE</span>
+  </div>
+</header>
 
-  <div class="knob-container">
-    <div class="knob" id="freq-knob">
-      <div class="knob-marker"></div>
+<main class="layout">
+
+  <!-- RADIO UNIT -->
+  <section id="radio-panel" aria-label="COM radio">
+    <div class="com-unit">
+
+      <div class="com-screen">
+        <div class="com-row">
+          <span class="com-tag">ACT</span>
+          <span id="active-freq" class="seg seg-act">---</span>
+          <span class="com-mhz">MHz</span>
+        </div>
+        <div class="com-divider"></div>
+        <div class="com-row">
+          <span class="com-tag">SBY</span>
+          <input type="text" id="standby-freq" class="seg seg-sby"
+                 inputmode="decimal" placeholder="118.100" maxlength="7"
+                 aria-label="Standby frequency">
+          <span class="com-mhz">MHz</span>
+        </div>
+      </div>
+
+      <div class="com-controls">
+        <button id="swap-btn" class="btn" title="Flip active / standby">&#8644;</button>
+        <button id="step-btn" class="btn">STEP: 0.050</button>
+        <div class="knob-wrap">
+          <div class="knob" id="freq-knob" role="slider" aria-label="Tuning knob" tabindex="0">
+            <span class="knob-tick"></span>
+          </div>
+          <div class="knob-label">TUNE</div>
+        </div>
+      </div>
+
+      <div id="result">STANDBY</div>
     </div>
-    <div class="knob-label">TUNE</div>
+  </section>
 
-    
-  </div>
-  <button id="step-btn">STEP: 0.050</button>
-  <div id="result"></div>
-</div>
+  <!-- DATABASE -->
+  <section id="controller-panel" aria-label="Frequency database">
+    <div class="panel-title">FREQUENCY DATABASE</div>
 
-<!-- CONTROLLER PANEL -->
-<div id="controller-panel">
+    <div class="controller-toolbar">
+      <input type="text" id="search-bar" placeholder="Search frequency, airport, name…" />
+      <select id="filter-area"><option value="all">All Areas</option></select>
+      <select id="filter-airport"><option value="all">All Airports</option></select>
+      <select id="filter-type">
+        <option value="all">All Types</option>
+        <option value="GND">Ground</option>
+        <option value="TWR">Tower</option>
+        <option value="CENTER">Center</option>
+        <option value="ATIS">ATIS</option>
+      </select>
+    </div>
 
-  <div class="panel-title">FREQUENCY DATABASE</div>
+    <div id="frequency-list"></div>
+  </section>
 
-  <div class="controller-toolbar">
-    <input type="text" id="search-bar" placeholder="Search frequencies..." />
-
-    <select id="filter-area">
-      <option value="all">All Areas</option>
-    </select>
-
-    <select id="filter-airport">
-      <option value="all">All Airports</option>
-    </select>
-
-    <select id="filter-type">
-  <option value="all">All Types</option>
-  <option value="GND">Ground</option>
-  <option value="TWR">Tower</option>
-  <option value="CENTER">Center</option>
-  <option value="ATIS">ATIS</option>
-</select>
-  </div>
-
-  <div id="frequency-list"></div>
-
-</div>
-
-</div>
+</main>
 
 <script src="app.js"></script>
 </body>
