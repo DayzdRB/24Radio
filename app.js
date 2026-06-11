@@ -649,7 +649,7 @@ function speakText(text) {
 
   speechSynthesis.speak(utterance);
 }
-
+// ==== TUNING KNOB ==== //
 const knob = document.getElementById("freq-knob");
 let isDragging = false;
 let startAngle = 0;
@@ -658,106 +658,87 @@ let currentFreq = 122.800;
 
 standbyFreqEl.value = currentFreq.toFixed(3);
 
+// Snap rotation -> frequency and update the standby display + knob transform.
+function applyRotation() {
+  const degreesPerStep = 10;
+  const steps = Math.round(totalRotation / degreesPerStep);
+  const newFreq = 122.800 + steps * GlobalfreqIncrement;
+  currentFreq = Number(newFreq.toFixed(3));
+  standbyFreqEl.value = currentFreq.toFixed(3);
+  knob.style.transform = `rotate(${steps * degreesPerStep}deg)`;
+}
+
+// Typing into standby moves the knob to match.
 standbyFreqEl.addEventListener("input", (e) => {
   const typedFreq = parseFloat(e.target.value);
   if (!isNaN(typedFreq)) {
     currentFreq = typedFreq;
-    const freqIncrement = GlobalfreqIncrement;
     const degreesPerStep = 10;
-    const steps = Math.round((typedFreq - 122.800) / freqIncrement);
+    const steps = Math.round((typedFreq - 122.800) / GlobalfreqIncrement);
     totalRotation = steps * degreesPerStep;
     knob.style.transform = `rotate(${totalRotation}deg)`;
   }
 });
 
 if (knob) {
-  knob.addEventListener("mousedown", startDrag);
-  document.addEventListener("mousemove", drag);
-  document.addEventListener("mouseup", endDrag);
-
-  knob.addEventListener("touchstart", (e) => {
-    startDrag(e.touches[0]);
-    e.preventDefault();
-  });
-  document.addEventListener("touchmove", (e) => {
-    drag(e.touches[0]);
-    e.preventDefault();
-  });
-  document.addEventListener("touchend", endDrag);
+  function angleFrom(e) {
+    const rect = knob.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    return Math.atan2(e.clientY - cy, e.clientX - cx);
+  }
 
   function startDrag(e) {
     isDragging = true;
-    const rect = knob.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+    startAngle = angleFrom(e);
+    knob.style.cursor = "grabbing";
   }
 
   function drag(e) {
-  if (!isDragging) return;
+    if (!isDragging) return;
+    const angle = angleFrom(e);
 
-  const rect = knob.getBoundingClientRect();
-  const centerX = rect.left + rect.width / 2;
-  const centerY = rect.top + rect.height / 2;
-  const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+    let delta = angle - startAngle;
+    if (delta > Math.PI)  delta -= 2 * Math.PI;
+    if (delta < -Math.PI) delta += 2 * Math.PI;
 
-  let deltaAngle = angle - startAngle;
-  if (deltaAngle > Math.PI) deltaAngle -= 2 * Math.PI;
-  if (deltaAngle < -Math.PI) deltaAngle += 2 * Math.PI;
+    // THE FIX: actually move the rotation by the drag delta.
+    totalRotation += delta * (180 / Math.PI);
+    startAngle = angle;
 
-    const freqIncrement = GlobalfreqIncrement;
-    const degreesPerStep = 10;
-    const steps = Math.round(totalRotation / degreesPerStep);
-    
-    const newFreq = 122.800 + (steps * freqIncrement);
-    const roundedFreq = Math.round(newFreq * 1000) / 1000;
-    
-    if (roundedFreq !== currentFreq) {
-      currentFreq = roundedFreq;
-      freqInput.value = currentFreq.toFixed(3);
-      showMessage("Frequency: " + currentFreq.toFixed(3));
-    }
-
-  knob.style.transform = `rotate(${totalRotation}deg)`;
-
-  function endDrag() {
-    isDragging = false;
-    const degreesPerStep = 10;
-    totalRotation = Math.round(totalRotation / degreesPerStep) * degreesPerStep;
-    knob.style.transform = `rotate(${totalRotation}deg)`;
-    
-    const freqIncrement = GlobalfreqIncrement;
-    const steps = Math.round(totalRotation / degreesPerStep);
-    const newFreq = 122.800 + (steps * freqIncrement);
-    currentFreq = Math.round(newFreq * 1000) / 1000;
-    freqInput.value = currentFreq.toFixed(3);
+    applyRotation();
+    showMessage("Standby " + currentFreq.toFixed(3));
   }
 
-  startAngle = angle;
+  function endDrag() {
+    if (!isDragging) return;
+    isDragging = false;
+    knob.style.cursor = "grab";
+
+    const degreesPerStep = 10;
+    totalRotation = Math.round(totalRotation / degreesPerStep) * degreesPerStep;
+    applyRotation();
+  }
+
+  // Pointer events cover mouse + touch with one code path.
+  knob.addEventListener("pointerdown", (e) => {
+    knob.setPointerCapture(e.pointerId);
+    startDrag(e);
+    e.preventDefault();
+  });
+  knob.addEventListener("pointermove", drag);
+  knob.addEventListener("pointerup", endDrag);
+  knob.addEventListener("pointercancel", endDrag);
+
+  // Keyboard accessibility: arrow keys nudge one step.
+  knob.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowUp" || e.key === "ArrowRight") {
+      totalRotation += 10; applyRotation(); e.preventDefault();
+    } else if (e.key === "ArrowDown" || e.key === "ArrowLeft") {
+      totalRotation -= 10; applyRotation(); e.preventDefault();
+    }
+  });
 }
-
-
-function endDrag() {
-  isDragging = false;
-
-  const degreesPerStep = 10;
-
-  totalRotation =
-    Math.round(totalRotation / degreesPerStep) * degreesPerStep;
-
-  knob.style.transform = `rotate(${totalRotation}deg)`;
-
-  const freqIncrement = GlobalfreqIncrement;
-
-  const steps = Math.round(totalRotation / degreesPerStep);
-
-  const newFreq = 122.800 + (steps * freqIncrement);
-
-  currentFreq = Number(newFreq.toFixed(3));
-
-  standbyFreqEl.value = currentFreq.toFixed(3);
-}
-
 
 }
 
