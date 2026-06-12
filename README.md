@@ -8,8 +8,12 @@ I want a dot off to the left of the frequency to show the controller status. Gre
 This goes for all airports Ground Towers and Controlers, ATIS will always be online.
 
 Future updates:
--- most important
-Add a ATIS text display below the tune knob
+--
+loading screen
+Discord VC connections
+On Top bar, next to online say "12 Controllers Online" instead of Online Unstaffed and ATIS always online
+Changelog
+About page
 --
 Add volume knob
 Add settings
