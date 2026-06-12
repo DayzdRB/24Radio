@@ -31,4 +31,11 @@ Dot system is working. I will probably leave out yellow dots since it is not nes
 I fixed the tune button so it will switch to 0.005 on the increment allowing any frequency to be tuned when you hit swap.
 
 
+Changelog V1.1:
+-Frequency Database
+-Controller Status
+-Visual Representation of ATIS
+-UI Revamp
+
+
 
